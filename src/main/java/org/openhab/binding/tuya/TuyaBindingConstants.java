@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,10 +8,10 @@
  */
 package org.openhab.binding.tuya;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
- * The {@link JavaSystemBinding} class defines common constants, which are
+ * The {@link TuyaBindingConstants} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Wim Vissers - Initial contribution
@@ -28,6 +28,7 @@ public class TuyaBindingConstants {
     public final static ThingTypeUID THING_TYPE_FILAMENT_LED = new ThingTypeUID(BINDING_ID, "filamentled");
     public final static ThingTypeUID THING_TYPE_SIREN = new ThingTypeUID(BINDING_ID, "siren");
     public final static ThingTypeUID THING_TYPE_CURTAIN_SWITCH = new ThingTypeUID(BINDING_ID, "curtainswitch");
+    public final static ThingTypeUID THING_TYPE_SWITCH = new ThingTypeUID(BINDING_ID, "switch");
 
     // List of all Channel ids.
     public final static String CHANNEL_POWER = "power";
@@ -42,5 +43,4 @@ public class TuyaBindingConstants {
 
     // Default API version (currently only 3.3 supported).
     public static final String DEFAULT_VERSION = "3.3";
-
 }

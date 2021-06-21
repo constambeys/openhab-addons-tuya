@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="tuya"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Smart Switch Thing Type -->
+	<thing-type id="switch">
+		<label>Tuya Smart Switch</label>
+		<description>Tuya smart switch device with one on/off channel</description>
+		<channels>
+			<channel id="power" typeId="power-channel"/>
+		</channels>
+		<config-description-ref uri="thing-type:tuya:config"/>
+	</thing-type>
+
+</thing:thing-descriptions>

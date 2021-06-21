@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,8 @@
  */
 package org.openhab.binding.tuya.internal.net;
 
-import static java.nio.channels.SelectionKey.*;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
  * TuyaClientService to obtain a client. It will be automatically registered with the service and serviced.
  *
  * @author Wim Vissers.
- *
  */
 public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Boolean> implements TcpConfig {
 
@@ -72,9 +72,9 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * Create a new TuyaClient with the given parameters.
      *
      * @param selector the Selector servicing this client.
-     * @param host     the Tuya host ip-address or name.
-     * @param port     the port number. When -1, the default port number is used.
-     * @param version  the Tuya API version.
+     * @param host the Tuya host ip-address or name.
+     * @param port the port number. When -1, the default port number is used.
+     * @param version the Tuya API version.
      * @param localKey the localKey for encryption of messages.
      * @throws UnsupportedVersionException
      */
@@ -187,7 +187,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * Send a message. If the device responds, the response will be emitted as a new event.
      *
      * @param deviceState the deviceState object that will be transformed to a json string.
-     * @param command     the commandbyte enum constant.
+     * @param command the commandbyte enum constant.
      * @throws IOException
      * @throws ParseException
      */
@@ -211,7 +211,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * Called by the service when disconnected.
      *
      * @param key the selection key.
-     * @param ex  the IOException (may by null).
+     * @param ex the IOException (may by null).
      */
     void handleDisconnect(SelectionKey key, IOException ex) {
         logger.debug("Disconnected.", ex);
@@ -246,7 +246,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
     /**
      * Called by the service when data arrived.
      *
-     * @param key  the selection key.
+     * @param key the selection key.
      * @param data the raw data bytes.
      */
     void handleData(SelectionKey key, byte[] data) {
@@ -308,5 +308,4 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
         DISCONNECTED,
         MESSAGE_RECEIVED;
     }
-
 }

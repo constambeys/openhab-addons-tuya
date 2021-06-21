@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,8 @@
 package org.openhab.binding.tuya.internal.net;
 
 import static java.lang.System.arraycopy;
-import static java.nio.channels.SelectionKey.*;
+import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * create new clients.
  *
  * @author Wim Vissers.
- *
  */
 public class TuyaClientService implements Runnable, TcpConfig {
 
@@ -78,8 +78,8 @@ public class TuyaClientService implements Runnable, TcpConfig {
      * Create a SelectionKey for the given client, and register the client to be serviced.
      *
      * @param client the TuyaClient.
-     * @param host   the host (name or ip address).
-     * @param port   the TCP port.
+     * @param host the host (name or ip address).
+     * @param port the TCP port.
      * @return the SelectionKey for this client.
      * @throws IOException when something goes wrong.
      */
@@ -276,5 +276,4 @@ public class TuyaClientService implements Runnable, TcpConfig {
             }
         }
     }
-
 }

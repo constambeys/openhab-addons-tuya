@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,10 @@ import org.openhab.binding.tuya.internal.exceptions.ParseException;
 /**
  * Parser for messages, with decryption where needed. Hence, a parser
  * is device dependent.
- *
+ * <p>
  * Ported from https://github.com/codetheweb/tuyapi.
  *
  * @author Wim Vissers.
- *
  */
 public class MessageParser {
 
@@ -157,5 +156,4 @@ public class MessageParser {
 
         return buffer;
     }
-
 }

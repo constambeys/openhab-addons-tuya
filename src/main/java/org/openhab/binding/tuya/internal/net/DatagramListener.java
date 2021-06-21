@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * Listener for UDP messages on the specified port.
  *
  * @author Wim Vissers.
- *
  */
 public class DatagramListener extends SingleEventEmitter<DatagramListener.Event, ByteBuffer, Boolean>
         implements UdpConfig {
@@ -94,5 +93,4 @@ public class DatagramListener extends SingleEventEmitter<DatagramListener.Event,
     public enum Event {
         UDP_PACKET_RECEIVED;
     }
-
 }

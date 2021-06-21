@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,12 @@ import static org.openhab.binding.tuya.TuyaBindingConstants.*;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.tuya.internal.data.Message;
 import org.openhab.binding.tuya.internal.data.SirenState;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  * A handler for a Tuya Switch device.
  *
  * @author Wim Vissers
- *
  */
 public class SirenHandler extends AbstractTuyaHandler {
 
@@ -80,5 +79,4 @@ public class SirenHandler extends AbstractTuyaHandler {
             return new SirenState(deviceDescriptor).withDuration(command);
         });
     }
-
 }

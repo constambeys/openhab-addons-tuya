@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,8 @@ import org.openhab.binding.tuya.internal.util.MessageParser;
 
 /**
  * Item to populate the TuyaClient send queue.
- * 
- * @author Wim Vissers - Initial contribution.
  *
+ * @author Wim Vissers - Initial contribution.
  */
 public class QueueItem {
 
@@ -38,9 +37,9 @@ public class QueueItem {
 
     /**
      * Encode the item for sending.
-     * 
+     *
      * @param messageParser the message parser (depends on the thing).
-     * @param sequenceNo    sequence number provided by the Tuya client.
+     * @param sequenceNo sequence number provided by the Tuya client.
      * @return the byte array, ready to send.
      */
     public byte[] encode(MessageParser messageParser, long sequenceNo) {
@@ -49,15 +48,18 @@ public class QueueItem {
     }
 
     /**
-     * Return true when the given QueueItem is conflicting with this item. This test is used to remove conflicting items from the queue. An example is a switch that may be on or off, and it makes no sense to have both an on and an off command in the queue at the same time.
+     * Return true when the given QueueItem is conflicting with this item. This test is used to remove conflicting items
+     * from the queue. An example is a switch that may be on or off, and it makes no sense to have both an on and an off
+     * command in the queue at the same time.
+     *
      * @param other the item to compare to.
      * @return true when conflicting.
      */
     public boolean isConflicting(QueueItem other) {
-        if (other != null && getCommandByte().equals(CommandByte.HEART_BEAT) && other.getCommandByte().equals(CommandByte.HEART_BEAT)) {
+        if (other != null && getCommandByte().equals(CommandByte.HEART_BEAT)
+                && other.getCommandByte().equals(CommandByte.HEART_BEAT)) {
             return true;
         }
         return deviceState == null ? false : deviceState.isConflicting(other);
     }
-
 }

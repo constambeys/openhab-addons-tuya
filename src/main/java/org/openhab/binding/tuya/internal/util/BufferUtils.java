@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.openhab.binding.tuya.internal.exceptions.ParseException;
  * Utility class for buffer operations.
  *
  * @author Wim Vissers.
- *
  */
 public class BufferUtils {
 
@@ -39,7 +38,7 @@ public class BufferUtils {
      * Get an unsigned 4 bytes number from the byte buffer.
      *
      * @param buffer the buffer containing the bytes.
-     * @param start  the start index (0-based).
+     * @param start the start index (0-based).
      * @return the number, reading 4 bytes from start to start + 4.
      * @throws ParseException
      */
@@ -59,8 +58,8 @@ public class BufferUtils {
      * Write an unsigned 4 bytes to the byte buffer.
      *
      * @param buffer the byte buffer.
-     * @param start  the start index.
-     * @param value  the number to store.
+     * @param start the start index.
+     * @param value the number to store.
      */
     public static void putUInt32(byte[] buffer, int start, long value) {
         long lv = value;
@@ -104,7 +103,7 @@ public class BufferUtils {
      *
      * @param buffer the target buffer.
      * @param source the source.
-     * @param from   the starting index in the target buffer.
+     * @param from the starting index in the target buffer.
      */
     public static byte[] copy(byte[] buffer, byte[] source, int from) {
         for (int i = 0; i < source.length; i++) {
@@ -118,7 +117,7 @@ public class BufferUtils {
      *
      * @param buffer the target buffer.
      * @param source the source.
-     * @param from   the starting index in the target buffer.
+     * @param from the starting index in the target buffer.
      */
     public static byte[] copy(byte[] buffer, byte[] source, int from, int length) {
         for (int i = 0; i < length; i++) {
@@ -132,7 +131,7 @@ public class BufferUtils {
      *
      * @param buffer the target buffer.
      * @param source the source.
-     * @param from   the starting index in the target buffer.
+     * @param from the starting index in the target buffer.
      */
     public static byte[] copy(byte[] buffer, String source, int from) {
         return copy(buffer, source.getBytes(), from);
@@ -142,8 +141,8 @@ public class BufferUtils {
      * Fill with constant value, in the range from to until.
      *
      * @param buffer the target buffer.
-     * @param fill   the fill byte.
-     * @param from   the starting index in the target buffer.
+     * @param fill the fill byte.
+     * @param from the starting index in the target buffer.
      * @param length the length in the target buffer.
      */
     public static byte[] fill(byte[] buffer, byte fill, int from, int length) {
@@ -152,5 +151,4 @@ public class BufferUtils {
         }
         return buffer;
     }
-
 }

@@ -11,22 +11,22 @@ package org.openhab.binding.tuya.handler;
 import static org.openhab.binding.tuya.TuyaBindingConstants.CHANNEL_POWER;
 
 import org.openhab.binding.tuya.internal.data.Message;
-import org.openhab.binding.tuya.internal.data.PowerPlugState;
+import org.openhab.binding.tuya.internal.data.SwitchState;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A handler for a Tuya Switch device.
+ * A handler for a Tuya Smart Switch device.
  *
- * @author Wim Vissers
+ * @author Frédéric Hannes
  */
-public class PowerPlugHandler extends AbstractTuyaHandler {
+public class SwitchHandler extends AbstractTuyaHandler {
 
-    private Logger logger = LoggerFactory.getLogger(PowerPlugHandler.class);
+    private Logger logger = LoggerFactory.getLogger(SwitchHandler.class);
 
-    public PowerPlugHandler(Thing thing) {
+    public SwitchHandler(Thing thing) {
         super(thing);
     }
 
@@ -37,7 +37,7 @@ public class PowerPlugHandler extends AbstractTuyaHandler {
     @Override
     protected void handleStatusMessage(Message message) {
         super.handleStatusMessage(message);
-        updateStates(message, PowerPlugState.class);
+        updateStates(message, SwitchState.class);
     }
 
     /**
@@ -45,9 +45,8 @@ public class PowerPlugHandler extends AbstractTuyaHandler {
      */
     @Override
     protected void initCommandDispatcher() {
-        // Channel power command with OnOffType.
-        commandDispatcher.on(CHANNEL_POWER, OnOffType.class, (ev, command) -> {
-            return new PowerPlugState(deviceDescriptor).withPower(command);
-        });
+        // Channel power command with StopMoveType.
+        commandDispatcher.on(CHANNEL_POWER, OnOffType.class,
+                (ev, command) -> new SwitchState(deviceDescriptor).withPower(command));
     }
 }

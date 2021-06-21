@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,11 @@ package org.openhab.binding.tuya.internal.data;
 
 import static org.openhab.binding.tuya.TuyaBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.tuya.internal.annotations.Channel;
 import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.Command;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -22,7 +22,6 @@ import com.google.gson.annotations.SerializedName;
  * This is the description of the status of the Filament LED device.
  *
  * @author Wim Vissers.
- *
  */
 public class SirenState extends DeviceState {
 
@@ -71,7 +70,6 @@ public class SirenState extends DeviceState {
      * The device properties. Please note that we use boxed classes here,
      * to allow them to be null. In case of setting properties, null properties
      * will not be serialized by Gson.
-     *
      */
     public class Dps {
 
@@ -92,7 +90,6 @@ public class SirenState extends DeviceState {
          */
         @SerializedName("5")
         private String dp5;
-
     }
 
     private enum Volume {
@@ -137,5 +134,4 @@ public class SirenState extends DeviceState {
             return UNDEFINED;
         }
     }
-
 }

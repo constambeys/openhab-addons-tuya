@@ -18,35 +18,25 @@ import org.openhab.core.types.Command;
 
 import com.google.gson.annotations.SerializedName;
 
-// {"devId":"70116356840d8e5f1cb3","dps":{"1":false},"t":1566481749}
-
 /**
  * This is the description of the status of the PowerPlug device.
  *
- * @author Gert Van Hoecke
+ * @author Frédéric Hannes
  */
-public class CurtainSwitchState extends DeviceState {
+public class SwitchState extends DeviceState {
 
-    private Dps dps;
+    private final Dps dps;
 
-    public CurtainSwitchState() {
+    public SwitchState() {
         dps = new Dps();
     }
 
-    public CurtainSwitchState(DeviceDescriptor deviceDescriptor) {
+    public SwitchState(DeviceDescriptor deviceDescriptor) {
         super(deviceDescriptor);
         dps = new Dps();
     }
 
-    public Dps getDps() {
-        return dps;
-    }
-
-    public void setDps(Dps dps) {
-        this.dps = dps;
-    }
-
-    public CurtainSwitchState withPower(Command command) {
+    public SwitchState withPower(Command command) {
         dps.dp1 = toBoolean(command);
         return this;
     }
@@ -67,16 +57,24 @@ public class CurtainSwitchState extends DeviceState {
     @Override
     public boolean isConflicting(QueueItem other) {
         DeviceState ds = other == null ? null : other.getDeviceState();
-        return ds == null ? false
-                : ds.getClass().equals(getClass()) && !((CurtainSwitchState) ds).dps.dp1.equals(dps.dp1);
+        return ds != null && ds.getClass().equals(getClass()) && !((SwitchState) ds).dps.dp1.equals(dps.dp1);
     }
 
     public class Dps {
 
+        /**
+         * Switch state on/off.
+         */
         @SerializedName("1")
         private Boolean dp1;
 
         @SerializedName("9")
         private Integer dp9;
+
+        @SerializedName("38")
+        private String dp38;
+
+        @SerializedName("42")
+        private String dp42;
     }
 }

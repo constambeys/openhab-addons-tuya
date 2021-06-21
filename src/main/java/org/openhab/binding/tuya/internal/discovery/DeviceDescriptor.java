@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import org.openhab.binding.tuya.internal.annotations.Property;
  * Descriptor of the device in the repository.
  *
  * @author Wim Vissers.
- *
  */
 public class DeviceDescriptor {
 
@@ -60,7 +59,7 @@ public class DeviceDescriptor {
     public Boolean isEncrypt() {
         return jsonDiscovery.isEncrypt();
     }
-    
+
     public Integer getActive() {
         return jsonDiscovery.getActive();
     }
@@ -90,5 +89,4 @@ public class DeviceDescriptor {
     public void setHandler(AbstractTuyaHandler handler) {
         this.handler = handler;
     }
-
 }

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,11 +27,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Cipher class for encrypting and decrypting messages.
- *
+ * <p>
  * Ported from https://github.com/codetheweb/tuyapi.
  *
  * @author Wim Vissers.
- *
  */
 public class TuyaCipher implements UdpConfig {
 
@@ -133,7 +132,6 @@ public class TuyaCipher implements UdpConfig {
             // logger.error("Unexpected error when decrypting.", e1);
             return null;
         }
-
     }
 
     /**
@@ -186,5 +184,4 @@ public class TuyaCipher implements UdpConfig {
             return null;
         }
     }
-
 }

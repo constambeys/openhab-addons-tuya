@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import com.google.gson.Gson;
  * Message received from the network.
  *
  * @author Wim Vissers.
- *
  */
 public class Message {
 
@@ -40,7 +39,7 @@ public class Message {
 
     /**
      * The raw data may be just an error message, or decoded more complex data.
-     * 
+     *
      * @return
      */
     public String getData() {
@@ -94,9 +93,8 @@ public class Message {
     /**
      * Try to parse the message data to the given class.
      *
-     * @param       %lt;T&gt; This method converts the data to DeviceState or subclasses thereof, given by the target
-     *                  class.
-     *
+     * @param %lt;T&gt; This method converts the data to DeviceState or subclasses thereof, given by the target
+     *            class.
      * @param clazz the target class.
      * @return
      * @return a new instance of clazz filled with the message data.
@@ -104,5 +102,4 @@ public class Message {
     public <T extends DeviceState> T toDeviceState(Class<T> clazz) {
         return GSON.fromJson(getData(), clazz);
     }
-
 }

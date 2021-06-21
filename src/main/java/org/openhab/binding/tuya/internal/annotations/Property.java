@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import java.lang.annotation.Target;
  * Annotate getters in the DeviceDescriptor objects to facilitate generic handling of properties.
  *
  * @author Wim Vissers
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -28,13 +27,12 @@ public @interface Property {
      *
      * @return the property name.
      */
-    public String value() default "";
+    String value() default "";
 
     /**
      * The display value when the property is null.
-     * 
+     *
      * @return the display value.
      */
-    public String nullValue() default "unknown";
-
+    String nullValue() default "unknown";
 }

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,19 @@ package org.openhab.binding.tuya.handler;
 
 import static org.openhab.binding.tuya.TuyaBindingConstants.*;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.tuya.internal.data.ColorLedState;
 import org.openhab.binding.tuya.internal.data.Message;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
 
 /**
  * A handler for a Tuya Color LED device.
  *
  * @author Wim Vissers
- *
  */
 public class ColorLedHandler extends AbstractTuyaHandler {
 
@@ -86,5 +85,4 @@ public class ColorLedHandler extends AbstractTuyaHandler {
             return new ColorLedState(deviceDescriptor).withColor(command).withColorMode(OnOffType.ON);
         });
     }
-
 }

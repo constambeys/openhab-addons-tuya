@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,10 @@ import java.util.function.BiFunction;
 /**
  * An event emitter that only allows a single handler for each event.
  *
- * @author Wim Vissers.
- *
  * @param &lt;E&gt; the event type.
  * @param &lt;P&gt; the type of payload the consumer accepts.
  * @param &lt;R&gt; the type of return object the callback functions provide.
+ * @author Wim Vissers.
  */
 public class SingleEventEmitter<E, P, R> {
 
@@ -35,7 +34,7 @@ public class SingleEventEmitter<E, P, R> {
      * Register a consumer to listen for certain events.
      *
      * @param eventName the name of the event to listen to.
-     * @param consumer  the consumer to call.
+     * @param consumer the consumer to call.
      */
     public synchronized SingleEventEmitter<E, P, R> on(E event, BiFunction<E, P, R> callback) {
         if (event != null) {
@@ -52,7 +51,7 @@ public class SingleEventEmitter<E, P, R> {
      * Register a consumer to listen for multiple events.
      *
      * @param eventName the name of the event to listen to.
-     * @param consumer  the consumer to call.
+     * @param consumer the consumer to call.
      */
     @SafeVarargs
     public final SingleEventEmitter<E, P, R> handle(BiFunction<E, P, R> callback, E... events) {
@@ -84,7 +83,7 @@ public class SingleEventEmitter<E, P, R> {
      * non-null value.
      *
      * @param eventName the event name.
-     * @param payload   the payload of type P.
+     * @param payload the payload of type P.
      */
     public R emit(E event, P payload) {
         if (callbacks.containsKey(event)) {
@@ -104,5 +103,4 @@ public class SingleEventEmitter<E, P, R> {
      */
     protected void handlerAdded(E event, BiFunction<E, P, R> callback) {
     }
-
 }

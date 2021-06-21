@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,14 +13,18 @@ import static org.openhab.binding.tuya.TuyaBindingConstants.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.openhab.binding.tuya.handler.ColorLedHandler;
+import org.openhab.binding.tuya.handler.CurtainSwitchHandler;
 import org.openhab.binding.tuya.handler.FilamentLedHandler;
 import org.openhab.binding.tuya.handler.PowerPlugHandler;
 import org.openhab.binding.tuya.handler.SirenHandler;
+import org.openhab.binding.tuya.handler.SwitchHandler;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * The {@link TuyaHandlerFactory} is responsible for creating things and thing
@@ -28,6 +32,7 @@ import org.openhab.binding.tuya.handler.SirenHandler;
  *
  * @author Wim Vissers - Initial contribution
  */
+@Component(service = ThingHandlerFactory.class, configurationPid = "binding.tuya")
 public class TuyaHandlerFactory extends BaseThingHandlerFactory {
 
     private static Set<ThingTypeUID> supportedThingTypes;
@@ -40,6 +45,8 @@ public class TuyaHandlerFactory extends BaseThingHandlerFactory {
             supportedThingTypes.add(THING_TYPE_COLOR_LED);
             supportedThingTypes.add(THING_TYPE_FILAMENT_LED);
             supportedThingTypes.add(THING_TYPE_SIREN);
+            supportedThingTypes.add(THING_TYPE_CURTAIN_SWITCH);
+            supportedThingTypes.add(THING_TYPE_SWITCH);
         }
         return supportedThingTypes.contains(thingTypeUID);
     }
@@ -57,6 +64,10 @@ public class TuyaHandlerFactory extends BaseThingHandlerFactory {
             return new FilamentLedHandler(thing);
         } else if (thingTypeUID.equals(THING_TYPE_SIREN)) {
             return new SirenHandler(thing);
+        } else if (thingTypeUID.equals(THING_TYPE_CURTAIN_SWITCH)) {
+            return new CurtainSwitchHandler(thing);
+        } else if (thingTypeUID.equals(THING_TYPE_SWITCH)) {
+            return new SwitchHandler(thing);
         }
 
         return null;

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,15 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.function.BiConsumer;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.tuya.internal.annotations.Channel;
 import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.binding.tuya.internal.net.QueueItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -30,7 +30,6 @@ import com.google.gson.annotations.SerializedName;
  * Basic template for status messages to/from devices.
  *
  * @author Wim Vissers.
- *
  */
 public class DeviceState {
 
@@ -154,9 +153,12 @@ public class DeviceState {
     public void setTime(long time) {
         this.time = time;
     }
-    
+
     /**
-     * Return true when the given QueueItem is conflicting with this item. This test is used to remove conflicting items from the queue. An example is a switch that may be on or off, and it makes no sense to have both an on and an off command in the queue at the same time.
+     * Return true when the given QueueItem is conflicting with this item. This test is used to remove conflicting items
+     * from the queue. An example is a switch that may be on or off, and it makes no sense to have both an on and an off
+     * command in the queue at the same time.
+     *
      * @param other the item to compare to.
      * @return true when conflicting.
      */
@@ -172,5 +174,4 @@ public class DeviceState {
     public String toJson() {
         return GSON.toJson(this);
     }
-
 }

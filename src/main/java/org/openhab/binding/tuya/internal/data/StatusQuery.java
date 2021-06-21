@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
  * template for a status request.
  *
  * @author Wim Vissers.
- *
  */
 public class StatusQuery extends DeviceState {
 
@@ -28,5 +27,4 @@ public class StatusQuery extends DeviceState {
     public String getGwId() {
         return gwId;
     }
-
 }

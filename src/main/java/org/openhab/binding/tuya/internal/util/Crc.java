@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2018 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,10 @@ package org.openhab.binding.tuya.internal.util;
 
 /**
  * Specific CRC calculation conform Tuya protocol.
- *
+ * <p>
  * Ported from https://github.com/codetheweb/tuyapi. Reverse engineered by kueblc.
  *
  * @author Wim Vissers.
- *
  */
 public class Crc {
 
@@ -61,5 +60,4 @@ public class Crc {
         }
         return ((crc & 0xFFFFFFFFL) ^ 0xFFFFFFFFL) & 0xFFFFFFFFL; // return 0xFFFFFFFFL;
     }
-
 }
