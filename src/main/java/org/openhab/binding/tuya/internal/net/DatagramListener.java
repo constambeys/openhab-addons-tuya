@@ -51,16 +51,18 @@ public class DatagramListener extends SingleEventEmitter<DatagramListener.Event,
                     ByteBuffer buf = ByteBuffer.allocate(UDP_SOCKET_BUFFER_SIZE);
                     while (running) {
                         try {
-                            if (channel == null) {
-                                channel = DatagramChannel.open();
-                                channel.socket().bind(new InetSocketAddress(port));
+                             while (running) {
+                                if (channel == null) {
+                                    channel = DatagramChannel.open();
+                                    channel.socket().bind(new InetSocketAddress(port));
+                                }
+                                buf.clear();
+                                channel.receive(buf);
+                                byte[] res = new byte[buf.position()];
+                                buf.flip();
+                                buf.get(res);
+                                emit(Event.UDP_PACKET_RECEIVED, buf);
                             }
-                            buf.clear();
-                            channel.receive(buf);
-                            byte[] res = new byte[buf.position()];
-                            buf.flip();
-                            buf.get(res);
-                            emit(Event.UDP_PACKET_RECEIVED, buf);
                         } catch (SocketTimeoutException ignored) {
                         } catch (IOException ex1) {
                             logger.error("DatagramEventEmitter", ex1);

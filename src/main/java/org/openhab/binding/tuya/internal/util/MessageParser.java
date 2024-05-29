@@ -27,8 +27,6 @@ import org.openhab.binding.tuya.internal.exceptions.ParseException;
  */
 public class MessageParser {
 
-    private static final int HEADER_SIZE = 16;
-
     // Helper class instances.
     private TuyaCipher cipher;
     private final String version;
@@ -43,6 +41,7 @@ public class MessageParser {
     }
 
     public Message decode(byte[] buffer) throws ParseException {
+        //https://github.com/jasonacox/tinytuya/discussions/260
         int length = buffer.length;
         // Check for length
         // At minimum requires: prefix (4), sequence (4), command (4), length (4),
@@ -52,62 +51,60 @@ public class MessageParser {
             throw new ParseException("Packet too short. Length: " + length);
         }
 
+        int sequenceNumberIndex, commandByteIndex, payloadSizeIndex, returnCodeIndex, retcode_len, payloadStart, payloadEnd;
+
         // Check for prefix
         long prefix = BufferUtils.getUInt32(buffer, 0);
-        if (prefix != 0x000055AA) {
+        if (prefix == 0x000055AA) {
+            sequenceNumberIndex = 4;
+            commandByteIndex = 8;
+            payloadSizeIndex = 12;
+            returnCodeIndex = 16;
+            retcode_len = 4;
+            payloadStart = 20;
+            payloadEnd = BufferUtils.indexOfUInt32(buffer, 0x0000AA55) - 4/*CRC*/;
+        } else if (false && prefix == 0x00006699) {
+            sequenceNumberIndex = 6;
+            commandByteIndex = 10;
+            payloadSizeIndex = 14;
+            returnCodeIndex = 18;
+            retcode_len = 0;
+            payloadStart = 30;
+            payloadEnd = BufferUtils.indexOfUInt32(buffer, 0x00009966) - 16/*CRC*/;
+        } else {
             throw new ParseException("Prefix does not match: " + String.format("%x", prefix));
         }
 
-        // Check for extra data
-        int leftover = 0;
-
-        // Leftover points to beginning of next packet, if any.
-        int suffixLocation = BufferUtils.indexOfUInt32(buffer, 0x0000AA55);
-        leftover = suffixLocation + 4;
-
         // Get sequence number
-        long sequenceNumber = BufferUtils.getUInt32(buffer, 4);
+        long sequenceNumber = BufferUtils.getUInt32(buffer, sequenceNumberIndex);
 
         // Get command byte
-        long commandByte = BufferUtils.getUInt32(buffer, 8);
+        long commandByte = BufferUtils.getUInt32(buffer, commandByteIndex);
 
         // Get payload size
-        long payloadSize = BufferUtils.getUInt32(buffer, 12);
-
-        // Check for payload
-        if (leftover - 8 < payloadSize) {
-            throw new ParseException("Packet missing payload: payload has length: " + payloadSize);
-        }
+        long payloadSize = BufferUtils.getUInt32(buffer, payloadSizeIndex);
 
         // Get the return code, 0 = success
         // This field is only present in messages from the devices
         // Absent in messages sent to device
-        long returnCode = BufferUtils.getUInt32(buffer, 16);
+        long returnCode = retcode_len > 0 ? BufferUtils.getUInt32(buffer, returnCodeIndex) : 0;
 
         // Get the payload
         // Adjust for messages lacking a return code
         byte[] payload;
-        boolean correct = false;
-        if ((returnCode & 0xFFFFFF00) != 0) {
-            payload = Arrays.copyOfRange(buffer, HEADER_SIZE, (int) (HEADER_SIZE + payloadSize - 8));
-        } else if (commandByte == CommandByte.STATUS.getValue()) {
-            correct = true;
-            payload = Arrays.copyOfRange(buffer, HEADER_SIZE + 3, (int) (HEADER_SIZE + payloadSize - 8));
-        } else {
-            payload = Arrays.copyOfRange(buffer, HEADER_SIZE + 4, (int) (HEADER_SIZE + payloadSize - 8));
-        }
+
+        payload = Arrays.copyOfRange(buffer, payloadStart, payloadEnd);
 
         // Check CRC
-        long expectedCrc = BufferUtils.getUInt32(buffer, (int) (HEADER_SIZE + payloadSize - 8));
-        long computedCrc = Crc.crc32(Arrays.copyOfRange(buffer, 0, (int) (payloadSize + 8)));
+        long expectedCrc = BufferUtils.getUInt32(buffer, payloadEnd);
+        long computedCrc = Crc.crc32(Arrays.copyOfRange(buffer, 0, payloadEnd));
 
         if (computedCrc != expectedCrc) {
             throw new ParseException("Crc error. Expected: " + expectedCrc + ", computed: " + computedCrc);
         }
         try {
-            // String data = new String(cipher.decrypt(payload), "UTF-8");
             byte[] data = cipher.decrypt(payload);
-            String text = correct ? new String(data, 16, data.length - 16) : new String(data, "UTF-8");
+            String text = new String(data, "UTF-8");
             return new Message(payload, sequenceNumber, commandByte, text);
         } catch (UnsupportedEncodingException | IllegalBlockSizeException e) {
             return new Message(payload, sequenceNumber, commandByte, new String(payload));
