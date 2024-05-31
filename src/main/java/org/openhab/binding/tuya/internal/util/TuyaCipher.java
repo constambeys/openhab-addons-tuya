@@ -14,11 +14,8 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.openhab.binding.tuya.internal.net.UdpConfig;
@@ -142,29 +139,12 @@ public class TuyaCipher implements UdpConfig {
      * @throws IllegalBlockSizeException
      * @throws UnsupportedEncodingException
      */
-    public byte[] decrypt(byte[] buffer) throws IllegalBlockSizeException {
+    public byte[] decryptV3(byte[] buffer) throws IllegalBlockSizeException {
         byte[] input = null;
         try {
             SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            /**
-             * boolean base64 = false;
-             * if (false) {
-             * if (this.version.equals("3.3")) {
-             * // Remove 3.3 header
-             * // input = Arrays.copyOfRange(buffer, 15, buffer.length);
-             * input = Arrays.copyOfRange(buffer, 19, buffer.length - 1);
-             * } else {
-             * // Data has version number and is encoded in base64
-             * // Remove prefix of version number and MD5 hash
-             * input = Arrays.copyOfRange(buffer, 19, buffer.length);
-             * base64 = true;
-             * }
-             * } else {
-             * input = buffer;
-             * }
-             */
             input = buffer;
             return cipher.doFinal(input);
         } catch (BadPaddingException e0) {
@@ -180,6 +160,34 @@ public class TuyaCipher implements UdpConfig {
                 return null;
             }
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e1) {
+            logger.error("Unexpected error when decrypting.", e1);
+            return null;
+        }
+    }
+
+    public byte[] decryptV5(byte[] enc, byte[] iv, byte header[]) throws IllegalBlockSizeException {
+
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
+            GCMParameterSpec gcmSpec = new GCMParameterSpec(16 * 8, iv);
+            Cipher cipher = Cipher.getInstance("aes/gcm/nopadding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec);
+            cipher.updateAAD(header);
+            return cipher.doFinal(enc);
+
+        } catch (AEADBadTagException e0) {
+            try {
+                SecretKeySpec secretKey = new SecretKeySpec(udpKey, "AES");
+                GCMParameterSpec gcmSpec = new GCMParameterSpec(16 * 8, iv);
+                Cipher cipher = Cipher.getInstance("aes/gcm/nopadding");
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec);
+                cipher.updateAAD(header);
+                return cipher.doFinal(enc);
+            } catch (Exception e) {
+                logger.error("Error decrypting packet.", e);
+                return null;
+            }
+        } catch (Exception e1) {
             logger.error("Unexpected error when decrypting.", e1);
             return null;
         }

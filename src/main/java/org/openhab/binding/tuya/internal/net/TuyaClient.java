@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -79,8 +80,9 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * @throws UnsupportedVersionException
      */
     public TuyaClient(String host, int port, String version, String localKey) throws UnsupportedVersionException {
-        if (!version.equals(DEFAULT_VERSION)) {
-            throw new UnsupportedVersionException("Currently only version 3.3. supported");
+        String versinos[] = new String[]{"3.3", "3.5"};
+        if (Arrays.stream(versinos).noneMatch((v) -> v.equals(version))) {
+            throw new UnsupportedVersionException("Version is not supported");
         }
         // Create a message parser for the given version and localKey.
         messageParser = new MessageParser(version, localKey);
@@ -259,7 +261,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                 }
             }
             emit(Event.MESSAGE_RECEIVED, message);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             logger.error("Invalid message received.", e);
         }
         queue.poll();

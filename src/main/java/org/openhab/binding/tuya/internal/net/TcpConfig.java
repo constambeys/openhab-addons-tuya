@@ -22,7 +22,6 @@ public interface TcpConfig {
     public static final int SELECTOR_TIMEOUT_MILLIS = 3000;
     public static final int INIT_DELAY_SECONDS = 2;
     public static final int DEFAULT_SERVER_PORT = 6668;
-    public static final String DEFAULT_VERSION = "3.3";
     public static final int TCP_SOCKET_BUFFER_SIZE = 1024;
     public static final int MAX_RETRIES = 8;
     public static final int RETRY_DELAY = 2;

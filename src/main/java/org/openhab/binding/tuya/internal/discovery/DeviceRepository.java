@@ -37,6 +37,8 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
      * The singleton instance.
      */
     private static final DeviceRepository INSTANCE = new DeviceRepository();
+
+
     /**
      * Listener for UDP packets transmitted to advertise devices.
      */
@@ -132,7 +134,7 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
                 emit(jd.getGwId(), dd);
             }
             return true;
-        } catch (ParseException e) {
+        } catch (Exception e) {
             logger.error("UDP packet could not be parsed", e);
             return false;
         }
