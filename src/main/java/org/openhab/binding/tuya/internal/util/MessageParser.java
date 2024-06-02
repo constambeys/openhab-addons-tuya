@@ -65,21 +65,39 @@ public class MessageParser {
         // Check for prefix
         long prefix = BufferUtils.getUInt32(buffer, 0);
         if (prefix == 0x000055AA) {
+
+            //EndMarker - 0x0000AA55
+            if(buffer[buffer.length - 4] != 0
+                    || buffer[buffer.length - 3] != 0
+                    || buffer[buffer.length - 2] != (byte)0xAA
+                    || buffer[buffer.length - 1] != (byte)0x55)
+                throw new ParseException("Suffix does not match: 0x0000AA55");
+
             sequenceNumberIndex = 4;
             commandByteIndex = 8;
             payloadSizeIndex = 12;
             returnCodeIndex = 16;
             retcode_len = 4;
             payloadStartIndex = 20;
-            payloadEndIndex = BufferUtils.indexOfUInt32(buffer, 0x0000AA55) - 4/*CRC*/;
+            payloadEndIndex = buffer.length - 8/*CRC*/;
+
         } else if (prefix == 0x00006699) {
+
+            //EndMarker - 0x00009966
+            if(buffer[buffer.length - 4] != 0
+                    || buffer[buffer.length - 3] != 0
+                    || buffer[buffer.length - 2] != (byte)0x99
+                    || buffer[buffer.length - 1] != (byte)0x66)
+                throw new ParseException("Suffix does not match: 0x00009966");
+
             sequenceNumberIndex = 6;
             commandByteIndex = 10;
             payloadSizeIndex = 14;
             returnCodeIndex = 18;
             retcode_len = 0;
             payloadStartIndex = 30;
-            payloadEndIndex = BufferUtils.indexOfUInt32(buffer, 0x00009966);
+            payloadEndIndex = buffer.length - 4;
+
         } else {
             throw new ParseException("Prefix does not match: " + String.format("%x", prefix));
         }

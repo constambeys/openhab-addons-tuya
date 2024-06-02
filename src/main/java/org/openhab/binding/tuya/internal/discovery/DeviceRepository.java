@@ -116,10 +116,9 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
      * @param packet the packet.
      */
     private boolean processPacket(ByteBuffer packet) {
+        byte[] res = BufferUtils.getBytes(packet);
         try {
-            packet.flip();
-            byte[] buf = BufferUtils.getBytes(packet);
-            Message message = parser.decode(buf);
+            Message message = parser.decode(res);
             JsonDiscovery jd = message.toJsonDiscovery();
             DeviceDescriptor dd = devices.get(jd.getGwId());
             if (dd == null) {
@@ -136,6 +135,7 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
             return true;
         } catch (Exception e) {
             logger.error("UDP packet could not be parsed", e);
+            logger.debug(BufferUtils.bytesToHex(res));
             return false;
         }
     }

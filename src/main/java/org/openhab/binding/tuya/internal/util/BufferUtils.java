@@ -29,7 +29,8 @@ public class BufferUtils {
      * @return the copy of the contents of the buffer as byte array.
      */
     public static byte[] getBytes(ByteBuffer buffer) {
-        byte[] result = new byte[buffer.remaining()];
+        byte[] result = new byte[buffer.position()];
+        buffer.flip();
         buffer.get(result);
         return result;
     }
@@ -76,26 +77,14 @@ public class BufferUtils {
      * @param marker
      * @return
      */
-    public static int indexOfUInt32(byte[] buffer, long marker) {
+    public static byte[] longToBytes(long marker) {
         long mrk = marker;
         byte[] m = new byte[4];
         for (int i = 3; i >= 0; i--) {
             m[i] = (byte) (mrk & 0xFF);
             mrk /= 256;
         }
-        int j = 0;
-        for (int p = 0; p < buffer.length; p++) {
-            if (buffer[p] == m[j]) {
-                if (j == 3) {
-                    return p - 3;
-                } else {
-                    j++;
-                }
-            } else {
-                j = 0;
-            }
-        }
-        return -1;
+        return m;
     }
 
     /**
