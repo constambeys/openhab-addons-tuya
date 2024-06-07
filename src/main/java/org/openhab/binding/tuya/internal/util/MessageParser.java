@@ -35,16 +35,20 @@ public class MessageParser {
 
     // Helper class instances.
     private TuyaCipher cipher;
-    private final String version;
+    private final String version ;
 
     public MessageParser(String version, String key) {
+        this.version = version;
         try {
             cipher = new TuyaCipher(key);
         } catch (UnsupportedEncodingException e) {
-
+            // Should not happen.
         }
-        // Should not happen.
-        this.version = version;
+    }
+
+    public MessageParser() {
+        this.version = "";
+        cipher = new TuyaCipher();
     }
 
     public Message decode(byte[] buffer) throws ParseException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, NoSuchPaddingException, NoSuchAlgorithmException {
@@ -67,10 +71,10 @@ public class MessageParser {
         if (prefix == 0x000055AA) {
 
             //EndMarker - 0x0000AA55
-            if(buffer[buffer.length - 4] != 0
+            if (buffer[buffer.length - 4] != 0
                     || buffer[buffer.length - 3] != 0
-                    || buffer[buffer.length - 2] != (byte)0xAA
-                    || buffer[buffer.length - 1] != (byte)0x55)
+                    || buffer[buffer.length - 2] != (byte) 0xAA
+                    || buffer[buffer.length - 1] != (byte) 0x55)
                 throw new ParseException("Suffix does not match: 0x0000AA55");
 
             sequenceNumberIndex = 4;
@@ -84,10 +88,10 @@ public class MessageParser {
         } else if (prefix == 0x00006699) {
 
             //EndMarker - 0x00009966
-            if(buffer[buffer.length - 4] != 0
+            if (buffer[buffer.length - 4] != 0
                     || buffer[buffer.length - 3] != 0
-                    || buffer[buffer.length - 2] != (byte)0x99
-                    || buffer[buffer.length - 1] != (byte)0x66)
+                    || buffer[buffer.length - 2] != (byte) 0x99
+                    || buffer[buffer.length - 1] != (byte) 0x66)
                 throw new ParseException("Suffix does not match: 0x00009966");
 
             sequenceNumberIndex = 6;
@@ -153,7 +157,7 @@ public class MessageParser {
         }
     }
 
-    public byte[] encode(byte[] input, CommandByte command, long sequenceNo) {
+    public byte[] encode(byte[] input, CommandByte command, long sequenceNo) throws Exception {
         byte[] payload = null;
         // Version 3.3 is always encrypted.
         if (version.equals("3.3")) {
@@ -167,6 +171,8 @@ public class MessageParser {
                 BufferUtils.copy(buffer, payload, 15);
                 payload = buffer;
             }
+        } else if (version.equals("3.5")) {
+            throw new Exception("Not implemented");
         } else {
             // todo: older protocols
             payload = input;

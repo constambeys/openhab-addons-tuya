@@ -41,6 +41,4 @@ public class TuyaBindingConstants {
     public final static String CHANNEL_DURATION = "duration";
     public final static String CHANNEL_CURTAIN = "curtain";
 
-    // Default API version (currently only 3.3 supported).
-    public static final String DEFAULT_VERSION = "3.3";
 }

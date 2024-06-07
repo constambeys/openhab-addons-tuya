@@ -8,8 +8,6 @@
  */
 package org.openhab.binding.tuya.internal.discovery;
 
-import static org.openhab.binding.tuya.TuyaBindingConstants.DEFAULT_VERSION;
-
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +20,7 @@ import org.openhab.binding.tuya.internal.net.UdpConfig;
 import org.openhab.binding.tuya.internal.util.BufferUtils;
 import org.openhab.binding.tuya.internal.util.MessageParser;
 import org.openhab.binding.tuya.internal.util.SingleEventEmitter;
+import org.openhab.binding.tuya.internal.util.TuyaCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +60,7 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
      */
     private DeviceRepository() {
         devices = new ConcurrentHashMap<>();
-        parser = new MessageParser(DEFAULT_VERSION, DEFAULT_UDP_KEY);
+        parser = new MessageParser();
     }
 
     /**

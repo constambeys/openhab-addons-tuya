@@ -69,7 +69,6 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
     /**
      * Update the states of channels that are changed.
      *
-     * @param dev the device data.
      */
     protected void updateStates(Message message, Class<? extends DeviceState> clazz) {
         if (message != null && message.getData() != null && message.getData().startsWith("{")) {

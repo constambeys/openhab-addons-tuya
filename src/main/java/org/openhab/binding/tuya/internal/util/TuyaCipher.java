@@ -31,30 +31,23 @@ import org.slf4j.LoggerFactory;
  */
 public class TuyaCipher implements UdpConfig {
 
-    private static byte[] udpKey;
-    private static Logger logger;
+    private static Logger logger = LoggerFactory.getLogger(TuyaCipher.class);
 
     private byte[] key;
 
+    public TuyaCipher() {
+        this.key = getDigest(DEFAULT_UDP_KEY);
+    }
+
     public TuyaCipher(byte[] key) {
         this.key = key;
-        if (udpKey == null) {
-            setUdpKey(DEFAULT_UDP_KEY);
-        }
-        if (logger == null) {
-            logger = LoggerFactory.getLogger(getClass());
-        }
     }
 
     public TuyaCipher(String key) throws UnsupportedEncodingException {
         this(key.getBytes("UTF-8"));
     }
 
-    public static void setUdpKey(String key) {
-        udpKey = getDigest(key);
-    }
-
-    public static final byte[] getDigest(String key) {
+    private static final byte[] getDigest(String key) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(key.getBytes());
@@ -81,7 +74,7 @@ public class TuyaCipher implements UdpConfig {
             cipher.doFinal(buffer, result);
             return result;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-                | BadPaddingException | ShortBufferException e1) {
+                 | BadPaddingException | ShortBufferException e1) {
             // Should not happen
             return null;
         }
@@ -101,7 +94,7 @@ public class TuyaCipher implements UdpConfig {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return cipher.doFinal(buffer);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-                | BadPaddingException e1) {
+                 | BadPaddingException e1) {
             // Should not happen
             return null;
         }
@@ -125,7 +118,7 @@ public class TuyaCipher implements UdpConfig {
             cipher.doFinal(buffer, result);
             return result;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | ShortBufferException
-                | IllegalBlockSizeException | BadPaddingException e1) {
+                 | IllegalBlockSizeException | BadPaddingException e1) {
             // logger.error("Unexpected error when decrypting.", e1);
             return null;
         }
@@ -140,25 +133,14 @@ public class TuyaCipher implements UdpConfig {
      * @throws UnsupportedEncodingException
      */
     public byte[] decryptV3(byte[] buffer) throws IllegalBlockSizeException {
-        byte[] input = null;
-        try {
+          try {
             SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            input = buffer;
-            return cipher.doFinal(input);
-        } catch (BadPaddingException e0) {
-            SecretKeySpec secretKey = new SecretKeySpec(udpKey, "AES");
-            Cipher cipher;
-            try {
-                cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-                cipher.init(Cipher.DECRYPT_MODE, secretKey);
-                return cipher.doFinal(input);
-            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException
-                    | BadPaddingException e) {
-                logger.error("Error decrypting packet.", e);
-                return null;
-            }
+            return cipher.doFinal(buffer);
+        } catch (BadPaddingException e) {
+            logger.error("Error decrypting packet.", e);
+            return null;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e1) {
             logger.error("Unexpected error when decrypting.", e1);
             return null;
@@ -174,19 +156,9 @@ public class TuyaCipher implements UdpConfig {
             cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec);
             cipher.updateAAD(header);
             return cipher.doFinal(enc);
-
-        } catch (AEADBadTagException e0) {
-            try {
-                SecretKeySpec secretKey = new SecretKeySpec(udpKey, "AES");
-                GCMParameterSpec gcmSpec = new GCMParameterSpec(16 * 8, iv);
-                Cipher cipher = Cipher.getInstance("aes/gcm/nopadding");
-                cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec);
-                cipher.updateAAD(header);
-                return cipher.doFinal(enc);
-            } catch (Exception e) {
-                logger.error("Error decrypting packet.", e);
-                return null;
-            }
+        } catch (AEADBadTagException e) {
+            logger.error("Error decrypting packet.", e);
+            return null;
         } catch (Exception e1) {
             logger.error("Unexpected error when decrypting.", e1);
             return null;
