@@ -71,7 +71,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      *
      */
     protected void updateStates(Message message, Class<? extends DeviceState> clazz) {
-        if (message != null && message.getData() != null && message.getData().startsWith("{")) {
+        if (message != null && message.hasData()) {
             try {
                 DeviceState dev = message.toDeviceState(clazz);
                 if (dev != null) {
@@ -115,7 +115,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
                 StatusQuery query = new StatusQuery(deviceDescriptor);
                 tuyaClient.send(query, CommandByte.DP_QUERY);
             }
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             logger.error("Error on status request", e);
         }
     }
@@ -198,8 +198,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
                     updateProperties(false);
                     deviceDescriptor.setHandler(this);
                     thing.getConfiguration().put("ip", device.getIp());
-                    tuyaClient = new TuyaClient(device.getIp(), DEFAULT_SERVER_PORT, device.getVersion(),
-                            device.getLocalKey());
+                    tuyaClient = new TuyaClient(device);
 
                     // Handle error events
                     tuyaClient.on(Event.CONNECTION_ERROR, (ev, msg) -> {
@@ -230,13 +229,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
                         return true;
                     });
 
-                    // Delay start of client to avoid blocking initialization too long.
-                    scheduler.schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            tuyaClient.start(scheduler);
-                        }
-                    }, 100, TimeUnit.MILLISECONDS);
+                    tuyaClient.start(scheduler);
                 }
             }
         }

@@ -9,6 +9,7 @@
 package org.openhab.binding.tuya.internal.util;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -35,15 +36,16 @@ public class MessageParser {
 
     // Helper class instances.
     private TuyaCipher cipher;
-    private final String version ;
+    private final String version;
 
     public MessageParser(String version, String key) {
         this.version = version;
-        try {
-            cipher = new TuyaCipher(key);
-        } catch (UnsupportedEncodingException e) {
-            // Should not happen.
-        }
+        cipher = new TuyaCipher(key.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public MessageParser(String version, byte[] key) {
+        this.version = version;
+        cipher = new TuyaCipher(key);
     }
 
     public MessageParser() {
@@ -64,7 +66,7 @@ public class MessageParser {
             throw new ParseException("Packet too short. Length: " + length);
         }
 
-        int sequenceNumberIndex, commandByteIndex, payloadSizeIndex, returnCodeIndex, retcode_len, payloadStartIndex, payloadEndIndex;
+        int sequenceNumberIndex, commandByteIndex, payloadSizeIndex, returnCodeIndex, payloadStartIndex, payloadEndIndex;
 
         // Check for prefix
         long prefix = BufferUtils.getUInt32(buffer, 0);
@@ -81,7 +83,6 @@ public class MessageParser {
             commandByteIndex = 8;
             payloadSizeIndex = 12;
             returnCodeIndex = 16;
-            retcode_len = 4;
             payloadStartIndex = 20;
             payloadEndIndex = buffer.length - 8/*CRC*/;
 
@@ -98,7 +99,6 @@ public class MessageParser {
             commandByteIndex = 10;
             payloadSizeIndex = 14;
             returnCodeIndex = 18;
-            retcode_len = 0;
             payloadStartIndex = 30;
             payloadEndIndex = buffer.length - 4;
 
@@ -115,11 +115,6 @@ public class MessageParser {
         // Get payload size
         long payloadSize = BufferUtils.getUInt32(buffer, payloadSizeIndex);
 
-        // Get the return code, 0 = success
-        // This field is only present in messages from the devices
-        // Absent in messages sent to device
-        long returnCode = retcode_len > 0 ? BufferUtils.getUInt32(buffer, returnCodeIndex) : 0;
-
         // Get the payload
         // Adjust for messages lacking a return code
         byte[] payload;
@@ -127,6 +122,11 @@ public class MessageParser {
         payload = Arrays.copyOfRange(buffer, payloadStartIndex, payloadEndIndex);
 
         if (prefix == 0x000055AA) {
+            // Get the return code, 0 = success
+            // This field is only present in messages from the devices
+            // Absent in messages sent to device
+            long returnCode = BufferUtils.getUInt32(buffer, returnCodeIndex);
+
             // Check CRC
             long expectedCrc = BufferUtils.getUInt32(buffer, payloadEndIndex);
             long computedCrc = Crc.crc32(Arrays.copyOfRange(buffer, 0, payloadEndIndex));
@@ -134,79 +134,87 @@ public class MessageParser {
             if (computedCrc != expectedCrc) {
                 throw new ParseException("Crc error. Expected: " + expectedCrc + ", computed: " + computedCrc);
             }
-            try {
-                byte[] data = cipher.decryptV3(payload);
-                String text = new String(data, "UTF-8");
-                return new Message(payload, sequenceNumber, commandByte, text);
-            } catch (UnsupportedEncodingException | IllegalBlockSizeException e) {
-                return new Message(payload, sequenceNumber, commandByte, new String(payload));
-            }
+
+            byte[] data = cipher.decryptV3(payload);
+            return new Message(sequenceNumber, returnCode, commandByte, data);
+
         } else if (prefix == 0x00006699) {
             byte[] nonce = new byte[12];
             byte[] header = new byte[14];
-            copy(nonce, buffer, 18, 12);
-            copy(header, buffer, 4, 14);
+            BufferUtils.copy(nonce, 0, buffer, 18, 12);
+            BufferUtils.copy(header, 0, buffer, 4, 14);
 
-            byte[] data = cipher.decryptV5(payload, nonce, header);
-            //Return Code
-            data[0] = data[1] = data[2] = data[3] = ' ';
-            String text = new String(data, "UTF-8");
-            return new Message(payload, sequenceNumber, commandByte, text);
+            byte[] dataWithReturnCode = cipher.decryptV5(payload, nonce, header);
+            byte[] data = new byte[dataWithReturnCode.length - 4];
+            BufferUtils.copy(data, 0, dataWithReturnCode, 4, dataWithReturnCode.length - 4);
+            long returnCode = dataWithReturnCode[0] * 256 * 256 * 256 + dataWithReturnCode[1] * 256 * 256 + dataWithReturnCode[2] * 256 + dataWithReturnCode[3];
+            return new Message(sequenceNumber, returnCode, commandByte, data);
         } else {
             throw new ParseException("Prefix does not match: " + String.format("%x", prefix));
         }
     }
 
     public byte[] encode(byte[] input, CommandByte command, long sequenceNo) throws Exception {
-        byte[] payload = null;
+
         // Version 3.3 is always encrypted.
         if (version.equals("3.3")) {
-            payload = cipher.encrypt(input);
+
+            byte[] payload = cipher.encryptV3(input);
+
             // Check if we need an extended header. Depends on command.
             if (!command.equals(CommandByte.DP_QUERY)) {
                 // Add 3.3 header.
                 byte[] buffer = new byte[payload.length + 15];
-                BufferUtils.fill(buffer, (byte) 0x00, 0, 15);
-                BufferUtils.copy(buffer, "3.3", 0);
-                BufferUtils.copy(buffer, payload, 15);
+                Arrays.fill(buffer, 0, 15, (byte) 0x00);
+                BufferUtils.copy(buffer, 0, "3.3".getBytes());
+                BufferUtils.copy(buffer, 15, payload);
                 payload = buffer;
             }
+
+            if (sequenceNo < 0) {
+                sequenceNo = 0;
+            }
+            // Allocate buffer with room for  6 * 4 = 24 bytes
+            // prefix (4), sequence (4), command (4), length (4), payload (X), crc (4), and suffix (4)
+            byte[] buffer = new byte[payload.length + 24];
+
+            BufferUtils.putUInt32(buffer, 0, 0x000055AA); /*prefix */
+            BufferUtils.putUInt32(buffer, 4, sequenceNo); /*sequence number*/
+            BufferUtils.putUInt32(buffer, 8, command.getValue()); /*command id*/
+            BufferUtils.putUInt32(buffer, 12, payload.length + 4/*crc*/ + 4/*footer*/); /* length*/
+
+            // Add payload, crc and suffix
+            BufferUtils.copy(buffer, 16, payload); /*variable length encrypted payload data*/
+            BufferUtils.putUInt32(buffer, 16 + payload.length, Crc.crc32(buffer, 0, 16 + payload.length));
+            BufferUtils.putUInt32(buffer, 16 + payload.length + 4, 0x0000AA55);
+
+            return buffer;
+
         } else if (version.equals("3.5")) {
-            throw new Exception("Not implemented");
+
+            byte[] nonce = "17229322668.".getBytes(StandardCharsets.UTF_8); //12
+            // Allocate buffer with room for  6 * 4 = 24 bytes
+            // prefix (4),unknown (2), sequence (4), command id (4), length (4), nonce (12), payload (X), tag (16) and suffix (4)
+            byte[] buffer = new byte[input.length + 50];
+
+            // Add prefix, command and length.
+            BufferUtils.putUInt32(buffer, 0, 0x00006699);  /*prefix */
+            BufferUtils.putUInt32(buffer, 4, 0x0000);      /*unknown*/
+            BufferUtils.putUInt32(buffer, 6, sequenceNo);       /*sequence number*/
+            BufferUtils.putUInt32(buffer, 10, command.getValue());  /*command id*/
+            BufferUtils.putUInt32(buffer, 14, 12/*IV*/ + input.length + 16/*TAG*/);  /* length*/
+            BufferUtils.copy(buffer, 18, nonce); /*nonce*/
+
+            byte[] header = new byte[14];
+            BufferUtils.copy(header, 0, buffer, 4, 2/*unknown*/ + 4/*sequence id*/ + 4/*command id*/ + 4/*length*/);
+            byte[] payload = cipher.encryptV5(input, nonce, header);
+            BufferUtils.copy(buffer, 18 + 12, payload); /*variable length encrypted payload data*/
+            BufferUtils.putUInt32(buffer, 18 + 12 + payload.length, 0x00009966);
+            return buffer;
+
         } else {
-            // todo: older protocols
-            payload = input;
+            throw new Exception("Not implemented");
         }
-
-        // Allocate buffer with room for payload + 24 bytes for
-        // prefix, sequence, command, length, crc, and suffix
-        byte[] buffer = new byte[payload.length + 24];
-
-        // Add prefix, command and length.
-        BufferUtils.putUInt32(buffer, 0, 0x000055AA);
-        BufferUtils.putUInt32(buffer, 8, command.getValue());
-        BufferUtils.putUInt32(buffer, 12, payload.length + 8);
-
-        // Optionally add sequence number.
-        if (sequenceNo >= 0) {
-            BufferUtils.putUInt32(buffer, 4, sequenceNo);
-        }
-
-        // Add payload, crc and suffix
-        BufferUtils.copy(buffer, payload, 16);
-        byte[] crcbuf = new byte[payload.length + 16];
-        BufferUtils.copy(crcbuf, buffer, 0, payload.length + 16);
-        BufferUtils.putUInt32(buffer, payload.length + 16, Crc.crc32(crcbuf));
-        BufferUtils.putUInt32(buffer, payload.length + 20, 0x0000AA55);
-
-        return buffer;
     }
 
-    static byte[] copy(byte[] to, byte[] source, int sourcetIndex, int length) {
-
-        for (int i = 0; i < length; i++) {
-            to[i] = source[sourcetIndex + i];
-        }
-        return to;
-    }
 }

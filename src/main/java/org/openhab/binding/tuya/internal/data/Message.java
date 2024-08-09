@@ -12,6 +12,9 @@ import org.openhab.binding.tuya.internal.discovery.JsonDiscovery;
 
 import com.google.gson.Gson;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Message received from the network.
  *
@@ -19,22 +22,28 @@ import com.google.gson.Gson;
  */
 public class Message {
 
-    private byte[] payload;
-    private final String data;
     private static final Gson GSON = new Gson();
 
     private long sequenceNumber;
+    private long returnCode;
     private CommandByte commandByte;
+    private byte[] data;
 
-    public Message(String data) {
-        this.data = data;
+    public Message(String error) {
+        returnCode = 1;
+        this.data = error.getBytes(StandardCharsets.UTF_8);
     }
 
-    public Message(byte[] payload, long sequenceNumber, long commandByte, String data) {
-        this(data);
-        this.payload = payload;
+    public Message(Exception ex) {
+        returnCode = 1;
+        this.data = ex.getMessage().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public Message(long sequenceNumber, long returnCode, long commandByte, byte[] data) {
         this.sequenceNumber = sequenceNumber;
+        this.returnCode = returnCode;
         this.commandByte = CommandByte.valueOf((int) commandByte);
+        this.data = data;
     }
 
     /**
@@ -42,8 +51,19 @@ public class Message {
      *
      * @return
      */
-    public String getData() {
+    public byte[] getRawData() {
         return data;
+    }
+
+    public String getData() {
+
+        String text = null;
+        try {
+            text = new String(data, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            System.err.println(e.getStackTrace());
+        }
+        return text;
     }
 
     /**
@@ -53,37 +73,24 @@ public class Message {
      * @return true if the message contains data.
      */
     public boolean hasData() {
-        return data != null && !data.isEmpty() && data.startsWith("{");
-    }
-
-    public byte[] getPayload() {
-        return payload;
-    }
-
-    public void setPayload(byte[] payload) {
-        this.payload = payload;
+        return getData() != null && !getData().isEmpty() && getData().startsWith("{");
     }
 
     public long getSequenceNumber() {
         return sequenceNumber;
     }
 
-    public void setSequenceNumber(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
+    public long getReturnCode() {
+        return returnCode;
     }
 
     public CommandByte getCommandByte() {
         return commandByte;
     }
 
-    public void setCommandByte(CommandByte commandByte) {
-        this.commandByte = commandByte;
-    }
-
     /**
      * Try to parse the message data as a DeviceDatagram.
      *
-     * @param message the message (returned previously by the parser).
      * @return the DeviceDatagram if possible.
      */
     public JsonDiscovery toJsonDiscovery() {
@@ -94,8 +101,8 @@ public class Message {
      * Try to parse the message data to the given class.
      *
      * @param %lt;T&gt; This method converts the data to DeviceState or subclasses thereof, given by the target
-     *            class.
-     * @param clazz the target class.
+     *                  class.
+     * @param clazz     the target class.
      * @return
      * @return a new instance of clazz filled with the message data.
      */

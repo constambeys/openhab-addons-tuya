@@ -42,7 +42,7 @@ public class QueueItem {
      * @param sequenceNo sequence number provided by the Tuya client.
      * @return the byte array, ready to send.
      */
-    public byte[] encode(MessageParser messageParser, long sequenceNo) {
+    public byte[] encode(MessageParser messageParser, long sequenceNo) throws Exception {
         String data = deviceState == null ? "" : deviceState.toJson();
         return messageParser.encode(data.getBytes(), commandByte, sequenceNo);
     }

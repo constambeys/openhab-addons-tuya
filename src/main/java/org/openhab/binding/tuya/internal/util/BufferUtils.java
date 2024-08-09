@@ -58,14 +58,14 @@ public class BufferUtils {
     /**
      * Write an unsigned 4 bytes to the byte buffer.
      *
-     * @param buffer the byte buffer.
+     * @param to the byte buffer.
      * @param start  the start index.
      * @param value  the number to store.
      */
-    public static void putUInt32(byte[] buffer, int start, long value) {
+    public static void putUInt32(byte[] to, int start, long value) {
         long lv = value;
         for (int i = 3; i >= 0; i--) {
-            buffer[start + i] = (byte) (((lv & 0xFFFFFFFF) % 0x100) & 0xFF);
+            to[start + i] = (byte) (((lv & 0xFFFFFFFF) % 0x100) & 0xFF);
             lv /= 0x100;
         }
     }
@@ -73,7 +73,6 @@ public class BufferUtils {
     /**
      * Get the position of the marker.
      *
-     * @param buffer
      * @param marker
      * @return
      */
@@ -87,59 +86,14 @@ public class BufferUtils {
         return m;
     }
 
-    /**
-     * Copy from the source to the buffer, starting at index from.
-     *
-     * @param buffer the target buffer.
-     * @param source the source.
-     * @param from   the starting index in the target buffer.
-     */
-    public static byte[] copy(byte[] buffer, byte[] source, int from) {
-        for (int i = 0; i < source.length; i++) {
-            buffer[i + from] = source[i];
-        }
-        return buffer;
+
+    public static void copy(byte[] to, int start, byte[] source) {
+        System.arraycopy(source, 0, to, start, source.length);
     }
 
-    /**
-     * Copy from the source to the buffer, starting at index from.
-     *
-     * @param buffer the target buffer.
-     * @param source the source.
-     * @param from   the starting index in the target buffer.
-     */
-    public static byte[] copy(byte[] buffer, byte[] source, int from, int length) {
 
-        for (int i = 0; i < length; i++) {
-            buffer[i + from] = source[i];
-        }
-        return buffer;
-    }
-
-    /**
-     * Copy from the source to the buffer, starting at index from.
-     *
-     * @param buffer the target buffer.
-     * @param source the source.
-     * @param from   the starting index in the target buffer.
-     */
-    public static byte[] copy(byte[] buffer, String source, int from) {
-        return copy(buffer, source.getBytes(), from);
-    }
-
-    /**
-     * Fill with constant value, in the range from to until.
-     *
-     * @param buffer the target buffer.
-     * @param fill   the fill byte.
-     * @param from   the starting index in the target buffer.
-     * @param length the length in the target buffer.
-     */
-    public static byte[] fill(byte[] buffer, byte fill, int from, int length) {
-        for (int i = from; i < from + length; i++) {
-            buffer[i] = fill;
-        }
-        return buffer;
+    public static void copy(byte[] to, int start, byte[] source, int sourceIndex, int length) {
+        System.arraycopy(source, sourceIndex, to, start, length);
     }
 
     public static String bytesToHex(byte[] bytes) {

@@ -53,9 +53,15 @@ public class Crc {
      * @param buffer the byte buffer.
      * @returns Tuya CRC32
      */
-    public static long crc32(byte[] buffer) {
+    public static long crc32(byte[] buffer)
+    {
+        return crc32(buffer, 0, buffer.length);
+    }
+
+    public static long crc32(byte[] buffer, int start, int count) {
         long crc = 0xFFFFFFFFL;
-        for (byte b : buffer) {
+        for(int i=start; i<start + count; i++){
+            byte b = buffer[i];
             crc = ((crc >>> 8) & 0xFFFFFFFFL) ^ (crc32Table[(int) ((crc ^ b) & 0xff)] & 0xFFFFFFFFL);
         }
         return ((crc & 0xFFFFFFFFL) ^ 0xFFFFFFFFL) & 0xFFFFFFFFL; // return 0xFFFFFFFFL;

@@ -78,8 +78,6 @@ public class TuyaClientService implements Runnable, TcpConfig {
      * Create a SelectionKey for the given client, and register the client to be serviced.
      *
      * @param client the TuyaClient.
-     * @param host the host (name or ip address).
-     * @param port the TCP port.
      * @return the SelectionKey for this client.
      * @throws IOException when something goes wrong.
      */
@@ -91,6 +89,14 @@ public class TuyaClientService implements Runnable, TcpConfig {
 
         // Register client
         SelectionKey key = channel.register(selector, OP_CONNECT);
+        clients.put(key, client);
+        start();
+        return key;
+    }
+
+    public SelectionKey register(TuyaClient client,  SocketChannel channel) throws IOException {
+        channel.configureBlocking(false);
+        SelectionKey key = channel.register(selector, OP_WRITE);
         clients.put(key, client);
         start();
         return key;

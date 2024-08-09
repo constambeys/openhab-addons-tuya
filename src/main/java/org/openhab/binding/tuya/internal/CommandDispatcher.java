@@ -72,7 +72,7 @@ public class CommandDispatcher extends SingleEventEmitter<CommandEvent, Command,
             try {
                 client.send(data, commandByte);
                 event.setHandled(true);
-            } catch (IOException | ParseException | CancelledKeyException e) {
+            } catch (Exception e) {
                 logger.error("Error dispatching command.", e);
             }
         }
