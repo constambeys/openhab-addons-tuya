@@ -28,10 +28,7 @@ public class FilamentLedState extends DeviceState {
     private Dps dps;
 
     public FilamentLedState() {
-    }
-
-    public FilamentLedState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
+        super();
         dps = new Dps();
     }
 
@@ -53,7 +50,7 @@ public class FilamentLedState extends DeviceState {
 
     @Channel(CHANNEL_BRIGHTNESS)
     public DecimalType getBrightness() {
-        return dps.dp2 == null ? null : toDecimalType(dps.dp2);
+        return dps.dp2 == null ? null : toDecimalType(dps.dp2, 1000);
     }
 
     public FilamentLedState withColorTemperature(Command command) {
@@ -63,7 +60,7 @@ public class FilamentLedState extends DeviceState {
 
     @Channel(CHANNEL_COLOR_TEMPERATURE)
     public DecimalType getColorTemperature() {
-        return dps.dp3 == null ? null : toDecimalType(dps.dp3);
+        return dps.dp3 == null ? null : toDecimalType(dps.dp3, 1000);
     }
 
     /**
@@ -76,19 +73,19 @@ public class FilamentLedState extends DeviceState {
         /**
          * Lamp on/off.
          */
-        @SerializedName("1")
+        @SerializedName("20")
         private Boolean dp1;
 
         /**
          * Brightness 0..255.
          */
-        @SerializedName("2")
+        @SerializedName("22")
         private Integer dp2;
 
         /**
          * Color temperature 0..255.
          */
-        @SerializedName("3")
+        @SerializedName("23")
         private Integer dp3;
     }
 }

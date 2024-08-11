@@ -28,10 +28,7 @@ public class SirenState extends DeviceState {
     private Dps dps;
 
     public SirenState() {
-    }
-
-    public SirenState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
+        super();
         dps = new Dps();
     }
 

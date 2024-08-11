@@ -28,11 +28,7 @@ public class SwitchState extends DeviceState {
     private final Dps dps;
 
     public SwitchState() {
-        dps = new Dps();
-    }
-
-    public SwitchState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
+        super();
         dps = new Dps();
     }
 
@@ -68,13 +64,5 @@ public class SwitchState extends DeviceState {
         @SerializedName("1")
         private Boolean dp1;
 
-        @SerializedName("9")
-        private Integer dp9;
-
-        @SerializedName("38")
-        private String dp38;
-
-        @SerializedName("42")
-        private String dp42;
     }
 }

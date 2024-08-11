@@ -47,6 +47,6 @@ public class SwitchHandler extends AbstractTuyaHandler {
     protected void initCommandDispatcher() {
         // Channel power command with StopMoveType.
         commandDispatcher.on(CHANNEL_POWER, OnOffType.class,
-                (ev, command) -> new SwitchState(deviceDescriptor).withPower(command));
+                (ev, command) -> new SwitchState().withPower(command));
     }
 }

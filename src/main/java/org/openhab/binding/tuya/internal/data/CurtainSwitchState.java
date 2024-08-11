@@ -30,11 +30,7 @@ public class CurtainSwitchState extends DeviceState {
     private Dps dps;
 
     public CurtainSwitchState() {
-        dps = new Dps();
-    }
-
-    public CurtainSwitchState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
+        super();
         dps = new Dps();
     }
 

@@ -10,9 +10,9 @@ package org.openhab.binding.tuya.handler;
 
 import static org.openhab.binding.tuya.internal.data.CommandByte.*;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -21,12 +21,10 @@ import org.openhab.binding.tuya.internal.annotations.Property;
 import org.openhab.binding.tuya.internal.data.CommandByte;
 import org.openhab.binding.tuya.internal.data.DeviceState;
 import org.openhab.binding.tuya.internal.data.Message;
-import org.openhab.binding.tuya.internal.data.StatusQuery;
 import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.binding.tuya.internal.discovery.DeviceRepository;
 import org.openhab.binding.tuya.internal.discovery.JsonDiscovery;
 import org.openhab.binding.tuya.internal.exceptions.HandlerInitializationException;
-import org.openhab.binding.tuya.internal.exceptions.ParseException;
 import org.openhab.binding.tuya.internal.exceptions.UnsupportedVersionException;
 import org.openhab.binding.tuya.internal.net.TcpConfig;
 import org.openhab.binding.tuya.internal.net.TuyaClient;
@@ -55,8 +53,8 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
     private final Logger logger = LoggerFactory.getLogger(AbstractTuyaHandler.class);
 
     protected String id;
-
     protected DeviceDescriptor deviceDescriptor;
+
     protected TuyaClient tuyaClient;
     protected final CommandDispatcher commandDispatcher;
     private ScheduledFuture<?> watchdog;
@@ -68,7 +66,6 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
 
     /**
      * Update the states of channels that are changed.
-     *
      */
     protected void updateStates(Message message, Class<? extends DeviceState> clazz) {
         if (message != null && message.hasData()) {
@@ -109,11 +106,8 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      */
     protected void sendStatusQuery() {
         try {
-            if (deviceDescriptor == null) {
-                logger.info("No device descriptor, skipping status query.");
-            } else {
-                StatusQuery query = new StatusQuery(deviceDescriptor);
-                tuyaClient.send(query, CommandByte.DP_QUERY);
+            if (tuyaClient != null && tuyaClient.isOnline()) {
+                tuyaClient.send(null, CommandByte.DP_QUERY);
             }
         } catch (Exception e) {
             logger.error("Error on status request", e);
@@ -141,8 +135,8 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
             watchdog.cancel(true);
             watchdog = null;
         }
-        if (deviceDescriptor != null && deviceDescriptor.getGwId() != null) {
-            DeviceRepository.getInstance().removeHandler(deviceDescriptor.getGwId());
+        if (deviceDescriptor != null && deviceDescriptor.getDevId() != null) {
+            DeviceRepository.getInstance().removeHandler(deviceDescriptor.getDevId());
         }
         if (commandDispatcher != null) {
             commandDispatcher.removeAllHandlers();
@@ -164,18 +158,21 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      * overridden in subclasses to add more specific device properties.
      */
     protected void updateProperties(boolean clear) {
-        for (Method method : DeviceDescriptor.class.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Property.class) && method.getParameterCount() == 0) {
-                Property prop = method.getAnnotation(Property.class);
-                thing.setProperty(prop.value(), "");
-                if (!clear) {
-                    Object obj;
+        if (clear) {
+            thing.setProperties(new HashMap<>());
+        } else {
+            for (Method method : DeviceDescriptor.class.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Property.class) && method.getParameterCount() == 0) {
+                    Property prop = method.getAnnotation(Property.class);
+                    thing.setProperty(prop.value(), "");
+
                     try {
-                        obj = method.invoke(deviceDescriptor, (Object[]) null);
+                        Object obj = method.invoke(deviceDescriptor, (Object[]) null);
                         thing.setProperty(prop.value(), obj == null ? prop.nullValue() : obj.toString());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         logger.error("Property value could not be retrieved", e);
                     }
+
                 }
             }
         }
@@ -188,50 +185,48 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      * @throws UnsupportedVersionException
      */
     private void deviceFound(DeviceDescriptor device) throws UnsupportedVersionException {
-        if (device != null) {
-            JsonDiscovery jd = device.getJsonDiscovery();
-            if (jd != null && jd.getGwId() != null && jd.getGwId().equals(id)) {
-                if (deviceDescriptor == null || !deviceDescriptor.getIp().equals(jd.getIp())) {
-                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
-                            "IP address: " + device.getIp());
-                    deviceDescriptor = device;
+        if (device != null && device.getDevId().equals(id) ) {
+            if (deviceDescriptor == null || !deviceDescriptor.getIp().equals(device.getIp())) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
+                        "IP address: " + device.getIp());
+                deviceDescriptor = device;
+                updateProperties(false);
+                deviceDescriptor.setHandler(this);
+                thing.getConfiguration().put("ip", device.getIp());
+                tuyaClient = new TuyaClient(device);
+
+                // Handle error events
+                tuyaClient.on(Event.CONNECTION_ERROR, (ev, msg) -> {
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                            msg == null ? "" : msg.getData());
+                    return true;
+                });
+
+                // Handle connected event.
+                tuyaClient.on(Event.CONNECTED, (ev, msg) -> {
+                    updateStatus(ThingStatus.ONLINE);
                     updateProperties(false);
-                    deviceDescriptor.setHandler(this);
-                    thing.getConfiguration().put("ip", device.getIp());
-                    tuyaClient = new TuyaClient(device);
-
-                    // Handle error events
-                    tuyaClient.on(Event.CONNECTION_ERROR, (ev, msg) -> {
-                        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                                msg == null ? "" : msg.getData());
-                        return true;
-                    });
-
-                    // Handle connected event.
-                    tuyaClient.on(Event.CONNECTED, (ev, msg) -> {
-                        updateStatus(ThingStatus.ONLINE);
-                        updateProperties(false);
-                        // Ask status after some delay to let the items be created first.
-                        scheduler.schedule(new Runnable() {
-                            @Override
-                            public void run() {
-                                sendStatusQuery();
-                            }
-                        }, STATUS_REQUEST_DELAY_SECONDS, TimeUnit.SECONDS);
-                        return true;
-                    });
-
-                    // Handle messages received.
-                    tuyaClient.on(Event.MESSAGE_RECEIVED, (ev, msg) -> {
-                        if (msg.getCommandByte() == STATUS || msg.getCommandByte() == DP_QUERY) {
-                            handleStatusMessage(msg);
+                    // Ask status after some delay to let the items be created first.
+                    scheduler.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendStatusQuery();
                         }
-                        return true;
-                    });
+                    }, STATUS_REQUEST_DELAY_SECONDS, TimeUnit.SECONDS);
+                    return true;
+                });
 
-                    tuyaClient.start(scheduler);
-                }
+                // Handle messages received.
+                tuyaClient.on(Event.MESSAGE_RECEIVED, (ev, msg) -> {
+                    if (msg.getCommandByte() == STATUS || msg.getCommandByte() == DP_QUERY) {
+                        handleStatusMessage(msg);
+                    }
+                    return true;
+                });
+
+                tuyaClient.start(scheduler);
             }
+
         }
     }
 
@@ -301,8 +296,10 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
         // Init dispatcher.
         initCommandDispatcher();
 
+        /*
         // Start the watchdog to reinitialize when offline.
         startWatchdog();
+        */
     }
 
     private void startWatchdog() {

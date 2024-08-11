@@ -28,10 +28,7 @@ public class ColorLedState extends DeviceState {
     private Dps dps;
 
     public ColorLedState() {
-    }
-
-    public ColorLedState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
+        super();
         dps = new Dps();
     }
 

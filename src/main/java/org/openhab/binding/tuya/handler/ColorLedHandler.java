@@ -47,42 +47,42 @@ public class ColorLedHandler extends AbstractTuyaHandler {
     protected void initCommandDispatcher() {
         // Channel power command with OnOffType.
         commandDispatcher.on(CHANNEL_POWER, OnOffType.class, (ev, command) -> {
-            return new ColorLedState(deviceDescriptor).withPower(command);
+            return new ColorLedState().withPower(command);
         });
 
         // Color mode command with OnOffType.
         commandDispatcher.on(CHANNEL_COLOR_MODE, OnOffType.class, (ev, command) -> {
-            return new ColorLedState(deviceDescriptor).withColorMode(command);
+            return new ColorLedState().withColorMode(command);
         });
 
         // Brightness with PercentType.
         commandDispatcher.on(CHANNEL_BRIGHTNESS, PercentType.class, (ev, command) -> {
             updateState(new ChannelUID(thing.getUID(), CHANNEL_COLOR_MODE), OnOffType.OFF);
-            return new ColorLedState(deviceDescriptor).withBrightness(command).withColorMode(OnOffType.OFF);
+            return new ColorLedState().withBrightness(command).withColorMode(OnOffType.OFF);
         });
 
         // Brightness with DecimalType (deprecated).
         commandDispatcher.on(CHANNEL_BRIGHTNESS, DecimalType.class, (ev, command) -> {
             updateState(new ChannelUID(thing.getUID(), CHANNEL_COLOR_MODE), OnOffType.OFF);
-            return new ColorLedState(deviceDescriptor).withBrightness(command).withColorMode(OnOffType.OFF);
+            return new ColorLedState().withBrightness(command).withColorMode(OnOffType.OFF);
         });
 
         // Color temperature with PercentType.
         commandDispatcher.on(CHANNEL_COLOR_TEMPERATURE, PercentType.class, (ev, command) -> {
             updateState(new ChannelUID(thing.getUID(), CHANNEL_COLOR_MODE), OnOffType.OFF);
-            return new ColorLedState(deviceDescriptor).withColorTemperature(command).withColorMode(OnOffType.OFF);
+            return new ColorLedState().withColorTemperature(command).withColorMode(OnOffType.OFF);
         });
 
         // Color temperature with DecimalType (deprecated).
         commandDispatcher.on(CHANNEL_COLOR_TEMPERATURE, DecimalType.class, (ev, command) -> {
             updateState(new ChannelUID(thing.getUID(), CHANNEL_COLOR_MODE), OnOffType.OFF);
-            return new ColorLedState(deviceDescriptor).withColorTemperature(command).withColorMode(OnOffType.OFF);
+            return new ColorLedState().withColorTemperature(command).withColorMode(OnOffType.OFF);
         });
 
         // Color with HSBType.
         commandDispatcher.on(CHANNEL_COLOR, HSBType.class, (ev, command) -> {
             updateState(new ChannelUID(thing.getUID(), CHANNEL_COLOR_MODE), OnOffType.ON);
-            return new ColorLedState(deviceDescriptor).withColor(command).withColorMode(OnOffType.ON);
+            return new ColorLedState().withColor(command).withColorMode(OnOffType.ON);
         });
     }
 }

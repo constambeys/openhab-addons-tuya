@@ -17,42 +17,27 @@ package org.openhab.binding.tuya.internal.discovery;
  */
 public class JsonDiscovery {
 
+    //JSON PROPERTIES
+    private String ip;
     private String gwId;
-    private Integer active;
-    private Integer ability;
+    private String uuid;
+    private int active;
+    private int ablilty;
     private Boolean encrypt;
     private String productKey;
     private String version;
-    private String ip;
-
-    public JsonDiscovery() {
-    }
+    private Boolean token;
+    private Boolean wf_cfg;
+    private int clientLink;
 
     public JsonDiscovery(String gwId, String version, String ip) {
         this.gwId = gwId;
         this.version = version;
         this.ip = ip;
-        encrypt = true;
     }
 
-    public String getGwId() {
+    public String getDevId() {
         return gwId;
-    }
-
-    public Integer getActive() {
-        return active;
-    }
-
-    public Integer getAbility() {
-        return ability;
-    }
-
-    public Boolean isEncrypt() {
-        return encrypt;
-    }
-
-    public String getProductKey() {
-        return productKey;
     }
 
     public String getVersion() {

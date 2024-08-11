@@ -14,13 +14,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BiFunction;
 
 import org.openhab.binding.tuya.internal.data.Message;
-import org.openhab.binding.tuya.internal.exceptions.ParseException;
 import org.openhab.binding.tuya.internal.net.DatagramListener;
 import org.openhab.binding.tuya.internal.net.UdpConfig;
 import org.openhab.binding.tuya.internal.util.BufferUtils;
 import org.openhab.binding.tuya.internal.util.MessageParser;
 import org.openhab.binding.tuya.internal.util.SingleEventEmitter;
-import org.openhab.binding.tuya.internal.util.TuyaCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,17 +117,17 @@ public class DeviceRepository extends SingleEventEmitter<String, DeviceDescripto
         try {
             Message message = parser.decode(res);
             JsonDiscovery jd = message.toJsonDiscovery();
-            DeviceDescriptor dd = devices.get(jd.getGwId());
+            DeviceDescriptor dd = devices.get(jd.getDevId());
             if (dd == null) {
                 dd = new DeviceDescriptor(jd);
-                devices.put(jd.getGwId(), dd);
-                emit(jd.getGwId(), dd);
-                logger.info("Add device '{}' with IP address '{}' to the repository", jd.getGwId(), jd.getIp());
+                devices.put(jd.getDevId(), dd);
+                emit(jd.getDevId(), dd);
+                logger.info("Add device '{}' with IP address '{}' to the repository", jd.getDevId(), jd.getIp());
             } else if (dd.getLocalKey() == null) {
                 if (dd.getHandler() != null && !dd.getHandler().isOnline()) {
                     dd.getHandler().initialize();
                 }
-                emit(jd.getGwId(), dd);
+                emit(jd.getDevId(), dd);
             }
             return true;
         } catch (Exception e) {

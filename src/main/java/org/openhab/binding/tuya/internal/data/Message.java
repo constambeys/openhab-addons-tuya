@@ -39,10 +39,10 @@ public class Message {
         this.data = ex.getMessage().getBytes(StandardCharsets.UTF_8);
     }
 
-    public Message(long sequenceNumber, long returnCode, long commandByte, byte[] data) {
+    public Message(long sequenceNumber, long returnCode, CommandByte commandByte, byte[] data) {
         this.sequenceNumber = sequenceNumber;
         this.returnCode = returnCode;
-        this.commandByte = CommandByte.valueOf((int) commandByte);
+        this.commandByte =  commandByte;
         this.data = data;
     }
 

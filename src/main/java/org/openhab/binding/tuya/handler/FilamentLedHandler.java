@@ -45,27 +45,27 @@ public class FilamentLedHandler extends AbstractTuyaHandler {
     protected void initCommandDispatcher() {
         // Channel power command with OnOffType.
         commandDispatcher.on(CHANNEL_POWER, OnOffType.class, (ev, command) -> {
-            return new FilamentLedState(deviceDescriptor).withPower(command);
+            return new FilamentLedState().withPower(command);
         });
 
         // Brightness with PercentType.
         commandDispatcher.on(CHANNEL_BRIGHTNESS, PercentType.class, (ev, command) -> {
-            return new FilamentLedState(deviceDescriptor).withBrightness(command);
+            return new FilamentLedState().withBrightness(command);
         });
 
         // Brightness with DecimalType (deprecated).
         commandDispatcher.on(CHANNEL_BRIGHTNESS, DecimalType.class, (ev, command) -> {
-            return new FilamentLedState(deviceDescriptor).withBrightness(command);
+            return new FilamentLedState().withBrightness(command);
         });
 
         // Color temperature with PercentType.
         commandDispatcher.on(CHANNEL_COLOR_TEMPERATURE, PercentType.class, (ev, command) -> {
-            return new FilamentLedState(deviceDescriptor).withColorTemperature(command);
+            return new FilamentLedState().withColorTemperature(command);
         });
 
         // Color temperature with DecimalType (deprecated).
         commandDispatcher.on(CHANNEL_COLOR_TEMPERATURE, DecimalType.class, (ev, command) -> {
-            return new FilamentLedState(deviceDescriptor).withColorTemperature(command);
+            return new FilamentLedState().withColorTemperature(command);
         });
     }
 }

@@ -47,7 +47,7 @@ public class PowerPlugHandler extends AbstractTuyaHandler {
     protected void initCommandDispatcher() {
         // Channel power command with OnOffType.
         commandDispatcher.on(CHANNEL_POWER, OnOffType.class, (ev, command) -> {
-            return new PowerPlugState(deviceDescriptor).withPower(command);
+            return new PowerPlugState().withPower(command);
         });
     }
 }

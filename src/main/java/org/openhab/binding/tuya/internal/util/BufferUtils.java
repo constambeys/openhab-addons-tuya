@@ -91,11 +91,11 @@ public class BufferUtils {
         System.arraycopy(source, 0, to, start, source.length);
     }
 
-
     public static void copy(byte[] to, int start, byte[] source, int sourceIndex, int length) {
         System.arraycopy(source, sourceIndex, to, start, length);
     }
 
+    //https://stackoverflow.com/questions/332079/in-java-how-do-i-convert-a-byte-array-to-a-string-of-hex-digits-while-keeping-l
     public static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
@@ -106,5 +106,16 @@ public class BufferUtils {
             hexString.append(hex);
         }
         return hexString.toString().toUpperCase();  // Convert to uppercase for consistency
+    }
+
+    //https://stackoverflow.com/questions/140131/convert-a-string-representation-of-a-hex-dump-to-a-byte-array-using-java
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
     }
 }

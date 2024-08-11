@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.openhab.binding.tuya.internal.data.CommandByte;
 import org.openhab.binding.tuya.internal.data.DeviceState;
 import org.openhab.binding.tuya.internal.data.Message;
+import org.openhab.binding.tuya.internal.data.Version;
 import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.binding.tuya.internal.exceptions.ParseException;
 import org.openhab.binding.tuya.internal.util.MessageParser;
@@ -105,7 +106,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                 @Override
                 public void run() {
                     try {
-                        send(new DeviceState(device.getGwId()), CommandByte.HEART_BEAT);
+                        send(null, CommandByte.HEART_BEAT);
                     } catch (Exception e) {
                         logger.error("Cannot send command HEART_BEAT", e);
                     }
@@ -143,22 +144,18 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
 
         MessageParser messageParser = new MessageParser(device.getVersion(), device.getLocalKey());
 
+        currentSequenceNo = 1;
+        channel = SocketChannel.open();
+        channel.socket().setTcpNoDelay(true);
+        channel.connect(new InetSocketAddress(device.getIp(), DEFAULT_SERVER_PORT));
         dataToSend = messageParser.encode(local_nonce, SESS_KEY_NEG_START, currentSequenceNo++);
-        Message msg1 = null;
-
-        for (int i = 0; i < 3; i++) {
-            channel = SocketChannel.open();
-            channel.connect(new InetSocketAddress(device.getIp(), DEFAULT_SERVER_PORT));
-            channel.write(ByteBuffer.wrap(dataToSend));
-            ByteBuffer bb = ByteBuffer.allocate(102);
-            int bytesRead = channel.read(bb);
-            if (bytesRead == 102) {
-                msg1 = messageParser.decode(bb.array());
-                break;
-            } else {
-                Thread.sleep(10);
-            }
+        channel.write(ByteBuffer.wrap(dataToSend));
+        ByteBuffer bb = ByteBuffer.allocate(102);
+        int bytesRead = channel.read(bb);
+        if (bytesRead != 102) {
+            throw new Exception("Cannot SESS_KEY_NEG_START");
         }
+        Message msg1 = messageParser.decode(bb.array());
 
         byte[] remote_nonce = Arrays.copyOfRange(msg1.getRawData(), 0, 16);
 
@@ -197,7 +194,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * @throws IOException
      */
     private synchronized void connect() throws Exception {
-        if (device.getVersion().equals("3.5")) {
+        if (device.getVersion() == Version.V3_5) {
             SocketChannel channel = negotiate_session_key();
             key = TuyaClientService.getInstance().register(this, channel);
             heartbeatCnt.set(0);
@@ -254,7 +251,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * @throws ParseException
      */
     public void send(DeviceState deviceState, CommandByte command) throws Exception {
-        send(new QueueItem(deviceState, command));
+        send(new QueueItem(device, deviceState, command));
     }
 
     /**
@@ -320,6 +317,8 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                 if (heartbeatCnt.intValue() > 0) {
                     heartbeatCnt.decrementAndGet();
                 }
+            } else {
+                logger.debug("Message with Command {}", message.getData());
             }
             emit(Event.MESSAGE_RECEIVED, message);
         } catch (Exception e) {
@@ -351,7 +350,8 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
         try {
             if (!queue.isEmpty()) {
                 // Use peek to leave the message in the queue.
-                channel.write(ByteBuffer.wrap(queue.peek().encode(messageParser, currentSequenceNo++)));
+                byte[] msgToBeSent = queue.peek().encode(messageParser, currentSequenceNo++);
+                channel.write(ByteBuffer.wrap(msgToBeSent));
             }
         } catch (Exception e) {
             logger.debug("Exception in writeData.", e);

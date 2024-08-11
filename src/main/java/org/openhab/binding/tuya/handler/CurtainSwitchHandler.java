@@ -48,6 +48,6 @@ public class CurtainSwitchHandler extends AbstractTuyaHandler {
     protected void initCommandDispatcher() {
         // Channel power command with StopMoveType.
         commandDispatcher.on(CHANNEL_POWER, StopMoveType.class,
-                (ev, command) -> new PowerPlugState(deviceDescriptor).withPower(command));
+                (ev, command) -> new PowerPlugState().withPower(command));
     }
 }

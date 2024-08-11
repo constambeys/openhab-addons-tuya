@@ -8,63 +8,56 @@
  */
 package org.openhab.binding.tuya.internal.data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Human readable command types.
  *
  * @author Wim Vissers.
- *
  */
 public enum CommandByte {
-    UDP(0),
-    AP_CONFIG(1),
-    ACTIVE(2),
-    BIND(3),
-    RENAME_GW(4),
-    RENAME_DEVICE(5),
-    UNBIND(6),
-    CONTROL(7),
-    STATUS(8),
-    HEART_BEAT(9),
-    DP_QUERY(10),
-    QUERY_WIFI(11),
-    TOKEN_BIND(12),
-    CONTROL_NEW(13),
-    ENABLE_WIFI(14),
-    DP_QUERY_NEW(16),
-    SCENE_EXECUTE(17),
-    UDP_NEW(19),
-    AP_CONFIG_NEW(20),
-    LAN_GW_ACTIVE(240),
-    LAN_SUB_DEV_REQUEST(241),
-    LAN_DELETE_SUB_DEV(242),
-    LAN_REPORT_SUB_DEV(243),
-    LAN_SCENE(244),
-    LAN_PUBLISH_CLOUD_CONFIG(245),
-    LAN_PUBLISH_APP_CONFIG(246),
-    LAN_EXPORT_APP_CONFIG(247),
-    LAN_PUBLISH_SCENE_PANEL(248),
-    LAN_REMOVE_GW(249),
-    LAN_CHECK_GW_UPDATE(250),
-    LAN_GW_UPDATE(251),
-    LAN_SET_GW_CHANNEL(252),
-    UNKNOWN(255);
 
-    private int value;
+    SESS_KEY_NEG_START(map(Version.V3_5, 3)),
+    SESS_KEY_NEG_RESP(map(Version.V3_5, 4)),
+    SESS_KEY_NEG_FINISH(map(Version.V3_5, 5)),
 
-    private CommandByte(int value) {
-        this.value = value;
+    CONTROL(map(Version.V3_3, 7, Version.V3_5, 13)),
+    STATUS(map(Version.VALL, 8)),
+    HEART_BEAT(map(Version.VALL, 9)),
+    DP_QUERY(map(Version.V3_3, 10, Version.V3_5, 16)),
+    UNKNOWN(map(Version.VALL, 255));
+
+    private Map<String, Integer> values;
+
+    CommandByte(Map values) {
+        this.values = values;
     }
 
-    public int getValue() {
-        return value;
+    public int getValue(Version version) {
+        if (values.containsKey(version)) {
+            return values.get(version);
+        } else {
+            return values.get(Version.VALL);
+        }
     }
 
-    public static CommandByte valueOf(int value) {
+    public static CommandByte valueOf(Version version, int value) {
         for (CommandByte cb : CommandByte.values()) {
-            if (cb.value == value) {
+            if ((cb.values.containsKey(version) && cb.values.get(version) == value)
+                    || (cb.values.containsKey(Version.VALL) && cb.values.get(Version.VALL) == value)) {
                 return cb;
             }
         }
         return UNKNOWN;
     }
+
+    private static <K, V> Map<K, V> map(Object... objects) {
+        Map<K, V> map = new HashMap<>();
+        for (int n = 0; n < objects.length; n += 2) {
+            map.put((K) objects[n], (V) objects[n + 1]);
+        }
+        return map;
+    }
+
 }

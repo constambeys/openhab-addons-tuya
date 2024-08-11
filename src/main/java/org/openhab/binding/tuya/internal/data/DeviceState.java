@@ -39,17 +39,9 @@ public class DeviceState {
     // Empty array ready to use.
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
-    // The device ID.
-    private String devId;
-
-    @SerializedName("t")
-    long time;
+    private transient long time;
 
     public DeviceState() {
-    }
-
-    public DeviceState(DeviceDescriptor deviceDescriptor) {
-        this.devId = deviceDescriptor == null ? "" : deviceDescriptor.getGwId();
         this.time = new Date().getTime() / 1000;
     }
 
@@ -91,13 +83,17 @@ public class DeviceState {
      * @return the DecimalType in the range 0..1.
      */
     protected DecimalType toDecimalType(long value) {
-        return new DecimalType(value / 255.0);
+        return toDecimalType(value , 255.0);
+    }
+
+    protected DecimalType toDecimalType(long value, double range) {
+        return new DecimalType(value / range);
     }
 
     /**
      * Take an OH command represented as Color (HSBType) and convert it to a Tuya understandable RGB value.
      *
-     * @param hsb the color to encode.
+     * @param command HSBType the color to encode.
      * @return the command string.
      */
     protected String toColorString(Command command) {
@@ -142,17 +138,6 @@ public class DeviceState {
         }
     }
 
-    public String getDevId() {
-        return devId;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
 
     /**
      * Return true when the given QueueItem is conflicting with this item. This test is used to remove conflicting items
@@ -164,6 +149,11 @@ public class DeviceState {
      */
     public boolean isConflicting(QueueItem other) {
         return false;
+    }
+
+
+    public long getTime() {
+        return time;
     }
 
     /**

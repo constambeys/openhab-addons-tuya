@@ -30,20 +30,8 @@ public class PowerPlugState extends DeviceState {
     private Dps dps;
 
     public PowerPlugState() {
+        super();
         dps = new Dps();
-    }
-
-    public PowerPlugState(DeviceDescriptor deviceDescriptor) {
-        super(deviceDescriptor);
-        dps = new Dps();
-    }
-
-    public Dps getDps() {
-        return dps;
-    }
-
-    public void setDps(Dps dps) {
-        this.dps = dps;
     }
 
     public PowerPlugState withPower(Command command) {

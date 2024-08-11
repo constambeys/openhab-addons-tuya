@@ -10,6 +10,7 @@ package org.openhab.binding.tuya.internal.discovery;
 
 import org.openhab.binding.tuya.handler.AbstractTuyaHandler;
 import org.openhab.binding.tuya.internal.annotations.Property;
+import org.openhab.binding.tuya.internal.data.Version;
 
 /**
  * Descriptor of the device in the repository.
@@ -25,6 +26,10 @@ public class DeviceDescriptor {
     /**
      * The local encryption key must be set in the configuration. It is not transmitted by UDP.
      */
+
+    private String devId;
+    private String ip;
+    private Version version;
     private String localKey;
     private AbstractTuyaHandler handler;
 
@@ -32,45 +37,24 @@ public class DeviceDescriptor {
     }
 
     public DeviceDescriptor(JsonDiscovery jsonDiscovery) {
-        this.jsonDiscovery = jsonDiscovery;
+        this.devId = jsonDiscovery.getDevId();
+        this.ip = jsonDiscovery.getIp();
+        this.version = Version.parse(jsonDiscovery.getVersion());
     }
 
-    // Convenience methods.
-    @Property("ip-address")
+    @Property("id")
+    public String getDevId() {
+        return devId;
+    }
+
+    @Property("ip")
     public String getIp() {
-        return jsonDiscovery.getIp();
-    }
-
-    @Property("gw-id")
-    public String getGwId() {
-        return jsonDiscovery.getGwId();
+        return ip;
     }
 
     @Property("version")
-    public String getVersion() {
-        return jsonDiscovery.getVersion();
-    }
-
-    public String getProductKey() {
-        return jsonDiscovery.getProductKey();
-    }
-
-    @Property("encrypted")
-    public Boolean isEncrypt() {
-        return jsonDiscovery.isEncrypt();
-    }
-
-    public Integer getActive() {
-        return jsonDiscovery.getActive();
-    }
-
-    // JsonDiscovery getters and setters
-    public JsonDiscovery getJsonDiscovery() {
-        return jsonDiscovery;
-    }
-
-    public void setJsonDiscovery(JsonDiscovery jsonDiscovery) {
-        this.jsonDiscovery = jsonDiscovery;
+    public Version getVersion() {
+        return version;
     }
 
     public String getLocalKey() {

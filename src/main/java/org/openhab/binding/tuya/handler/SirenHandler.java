@@ -65,18 +65,18 @@ public class SirenHandler extends AbstractTuyaHandler {
                     }
                 }, duration, TimeUnit.SECONDS);
             }
-            return new SirenState(deviceDescriptor).withAlarm(command);
+            return new SirenState().withAlarm(command);
         });
 
         // Channel volume command with DecimalType.
         commandDispatcher.on(CHANNEL_VOLUME, DecimalType.class, (ev, command) -> {
-            return new SirenState(deviceDescriptor).withVolume(command);
+            return new SirenState().withVolume(command);
         });
 
         // Channel duration command with DecimalType.
         commandDispatcher.on(CHANNEL_DURATION, DecimalType.class, (ev, command) -> {
             duration = ((DecimalType) command).intValue();
-            return new SirenState(deviceDescriptor).withDuration(command);
+            return new SirenState().withDuration(command);
         });
     }
 }
