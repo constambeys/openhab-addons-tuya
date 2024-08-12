@@ -94,7 +94,7 @@ public class TuyaClientService implements Runnable, TcpConfig {
         return key;
     }
 
-    public SelectionKey register(TuyaClient client,  SocketChannel channel) throws IOException {
+    public SelectionKey register(TuyaClient client, SocketChannel channel) throws IOException {
         channel.configureBlocking(false);
         SelectionKey key = channel.register(selector, OP_WRITE);
         clients.put(key, client);
@@ -159,13 +159,13 @@ public class TuyaClientService implements Runnable, TcpConfig {
         SocketChannel channel = (SocketChannel) key.channel();
         TuyaClient client = clients.get(key);
         try {
-            logger.debug("Connecting {}.", client);
+            logger.debug("Connecting {}.", channel.getRemoteAddress());
             channel.finishConnect();
             channel.configureBlocking(false);
             channel.register(selector, OP_WRITE);
             client.handleConnect(key);
         } catch (IOException e) {
-            logger.debug("Error connecting {}.", client);
+            logger.debug("Error connecting {}.", e.getMessage());
             key.channel().close();
             key.cancel();
             if (client != null) {

@@ -43,7 +43,7 @@ public class FilamentLedState extends DeviceState {
     }
 
     public FilamentLedState withBrightness(Command command) {
-        dps.dp2 = toInt8(command);
+        dps.dp2 = toInt(command, 1000);
         dps.dp1 = dps.dp2 > 0;
         return this;
     }
@@ -54,7 +54,7 @@ public class FilamentLedState extends DeviceState {
     }
 
     public FilamentLedState withColorTemperature(Command command) {
-        dps.dp3 = toInt8(command);
+        dps.dp3 = toInt(command, 1000);
         return this;
     }
 

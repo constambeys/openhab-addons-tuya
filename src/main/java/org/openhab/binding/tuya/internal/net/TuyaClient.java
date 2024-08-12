@@ -238,7 +238,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                     emit(Event.CONNECTION_ERROR, new Message("no response to heartbeat"));
                 }
             }
-            key.interestOps(OP_WRITE);
+            if (online) key.interestOps(OP_WRITE);
         }
     }
 
@@ -274,7 +274,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      * @param ex  the IOException (may by null).
      */
     void handleDisconnect(SelectionKey key, IOException ex) {
-        logger.debug("Disconnected.", ex);
+        logger.debug("Disconnected.", ex.getMessage());
         if (key != null) {
             close(key.channel());
             key.cancel();
@@ -318,7 +318,10 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                     heartbeatCnt.decrementAndGet();
                 }
             } else {
-                logger.debug("Message with Command {}", message.getData());
+                if (message.getReturnCode() == 0)
+                    logger.debug("Message with Command {}", message.getData());
+                else
+                    logger.warn("Message with Command {}", message.getData());
             }
             emit(Event.MESSAGE_RECEIVED, message);
         } catch (Exception e) {
@@ -348,7 +351,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
         logger.debug("Write data requested for channel {}.", key.channel());
         SocketChannel channel = (SocketChannel) key.channel();
         try {
-            if (!queue.isEmpty()) {
+            if (channel.isConnected() && !queue.isEmpty()) {
                 // Use peek to leave the message in the queue.
                 byte[] msgToBeSent = queue.peek().encode(messageParser, currentSequenceNo++);
                 channel.write(ByteBuffer.wrap(msgToBeSent));

@@ -53,7 +53,7 @@ public class ColorLedState extends DeviceState {
     }
 
     public ColorLedState withBrightness(Command command) {
-        dps.dp3 = toInt8(command);
+        dps.dp3 = toInt(command, 255);
         dps.dp1 = dps.dp3 > 0;
         return this;
     }
@@ -64,7 +64,7 @@ public class ColorLedState extends DeviceState {
     }
 
     public ColorLedState withColorTemperature(Command command) {
-        dps.dp4 = toInt8(command);
+        dps.dp4 = toInt(command, 255);
         return this;
     }
 

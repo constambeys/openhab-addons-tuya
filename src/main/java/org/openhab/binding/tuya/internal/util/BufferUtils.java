@@ -58,9 +58,9 @@ public class BufferUtils {
     /**
      * Write an unsigned 4 bytes to the byte buffer.
      *
-     * @param to the byte buffer.
-     * @param start  the start index.
-     * @param value  the number to store.
+     * @param to    the byte buffer.
+     * @param start the start index.
+     * @param value the number to store.
      */
     public static void putUInt32(byte[] to, int start, long value) {
         long lv = value;
@@ -86,13 +86,24 @@ public class BufferUtils {
         return m;
     }
 
-
     public static void copy(byte[] to, int start, byte[] source) {
         System.arraycopy(source, 0, to, start, source.length);
     }
 
     public static void copy(byte[] to, int start, byte[] source, int sourceIndex, int length) {
         System.arraycopy(source, sourceIndex, to, start, length);
+    }
+
+    public static boolean startsWith(byte[] array, byte[] prefix) {
+        if (array.length < prefix.length) {
+            return false;
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (array[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //https://stackoverflow.com/questions/332079/in-java-how-do-i-convert-a-byte-array-to-a-string-of-hex-digits-while-keeping-l
@@ -114,7 +125,7 @@ public class BufferUtils {
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
+                    + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
     }

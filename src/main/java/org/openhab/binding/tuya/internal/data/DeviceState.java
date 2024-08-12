@@ -64,13 +64,13 @@ public class DeviceState {
      * from 0 to 255. This is used to convert dimmer commands to the 0..255 value used by the Tuya devices.
      *
      * @param command the OH command.
-     * @return the numeric value in the range 0..255.
+     * @return the numeric value in the range 0..range.
      */
-    protected Integer toInt8(Command command) {
+    protected Integer toInt(Command command, int range) {
         if (command instanceof PercentType) {
-            return (int) ((Math.round(((PercentType) (command)).intValue() * 255 / 100)) & 0xFF);
+            return (int) ((Math.round(((PercentType) (command)).intValue() * range / 100)) );
         } else if (command instanceof Number) {
-            return (int) ((Math.round(((Number) (command)).doubleValue() * 255)) & 0xFF);
+            return (int) ((Math.round(((Number) (command)).doubleValue() * range)) );
         } else {
             return null;
         }

@@ -136,6 +136,10 @@ public class MessageParser {
                 throw new ParseException("Crc error. Expected: " + expectedCrc + ", computed: " + computedCrc);
             }
 
+            if (BufferUtils.startsWith(payload, "3.3".getBytes())) {
+                payload = Arrays.copyOfRange(payload, 3 + 12, payload.length);
+            }
+
             byte[] data = cipher.decryptV3(payload);
             return new Message(sequenceNumber, returnCode, CommandByte.valueOf(Version.V3_3, (int) commandByte), data);
 
@@ -162,7 +166,7 @@ public class MessageParser {
             byte[] payload = cipher.encryptV3(input);
 
             // Check if we need an extended header. Depends on command.
-            if (!command.equals(CommandByte.DP_QUERY)) {
+            if (!(command == CommandByte.DP_QUERY || command == CommandByte.HEART_BEAT)) {
                 // Add 3.3 header.
                 byte[] tmp = new byte[15 + payload.length];
                 Arrays.fill(tmp, 0, 15, (byte) 0x00);
