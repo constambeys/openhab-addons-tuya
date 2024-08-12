@@ -194,7 +194,7 @@ public class MessageParser {
         } else if (version == Version.V3_5) {
 
             byte[] nonce = (Long.toString(new Date().getTime())).substring(0, 12).getBytes(StandardCharsets.UTF_8); //12
-            // Allocate buffer with room for  6 * 4 = 24 bytes
+            // Allocate buffer with room for  50 bytes
             // prefix (4),unknown (2), sequence (4), command id (4), length (4), nonce (12), payload (X), tag (16) and suffix (4)
             byte[] buffer = new byte[input.length + 50];
 
