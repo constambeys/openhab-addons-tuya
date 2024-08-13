@@ -338,6 +338,10 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
      *
      * @return
      */
+    public boolean isStarted() {
+        return heartbeat != null;
+    }
+
     public boolean isOnline() {
         return online;
     }

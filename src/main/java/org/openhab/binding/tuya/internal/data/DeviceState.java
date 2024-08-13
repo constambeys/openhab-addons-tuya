@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.function.BiConsumer;
 
 import org.openhab.binding.tuya.internal.annotations.Channel;
-import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.binding.tuya.internal.net.QueueItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -24,22 +23,21 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
 import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basic template for status messages to/from devices.
  *
  * @author Wim Vissers.
  */
-public class DeviceState {
+public class DeviceState<T> {
 
-    // To convert objects to a json String.
-    private static final Gson GSON = new Gson();
+    private final Logger logger = LoggerFactory.getLogger(DeviceState.class);
 
-    // Empty array ready to use.
-    private static final Object[] EMPTY_ARRAY = new Object[0];
+    transient long time;
 
-    private transient long time;
+    T dps;
 
     public DeviceState() {
         this.time = new Date().getTime() / 1000;
@@ -68,9 +66,9 @@ public class DeviceState {
      */
     protected Integer toInt(Command command, int range) {
         if (command instanceof PercentType) {
-            return (int) ((Math.round(((PercentType) (command)).intValue() * range / 100)) );
+            return (int) ((Math.round(((PercentType) (command)).intValue() * range / 100)));
         } else if (command instanceof Number) {
-            return (int) ((Math.round(((Number) (command)).doubleValue() * range)) );
+            return (int) ((Math.round(((Number) (command)).doubleValue() * range)));
         } else {
             return null;
         }
@@ -83,7 +81,7 @@ public class DeviceState {
      * @return the DecimalType in the range 0..1.
      */
     protected DecimalType toDecimalType(long value) {
-        return toDecimalType(value , 255.0);
+        return toDecimalType(value, 255.0);
     }
 
     protected DecimalType toDecimalType(long value, double range) {
@@ -123,13 +121,13 @@ public class DeviceState {
                 if (channel != null) {
                     if (State.class.isAssignableFrom(method.getReturnType())) {
                         try {
-                            State state = (State) method.invoke(this, EMPTY_ARRAY);
+                            State state = (State) method.invoke(this);
                             if (state != null) {
                                 handler.accept(channel.value(), state);
                             }
                         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                            // Silently ignore this
-                            System.out.println(e);
+                            // ignore this
+                            logger.error(e.toString());
                         }
                     }
                 }
@@ -162,6 +160,7 @@ public class DeviceState {
      * @return the json String.
      */
     public String toJson() {
-        return GSON.toJson(this);
+        Gson gson = new Gson();
+        return gson.toJson(dps);
     }
 }

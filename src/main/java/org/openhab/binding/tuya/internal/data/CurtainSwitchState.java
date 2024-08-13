@@ -25,21 +25,12 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Gert Van Hoecke
  */
-public class CurtainSwitchState extends DeviceState {
+public class CurtainSwitchState extends DeviceState<CurtainSwitchState.Dps> {
 
-    private Dps dps;
 
     public CurtainSwitchState() {
         super();
         dps = new Dps();
-    }
-
-    public Dps getDps() {
-        return dps;
-    }
-
-    public void setDps(Dps dps) {
-        this.dps = dps;
     }
 
     public CurtainSwitchState withPower(Command command) {
@@ -62,9 +53,18 @@ public class CurtainSwitchState extends DeviceState {
      */
     @Override
     public boolean isConflicting(QueueItem other) {
-        DeviceState ds = other == null ? null : other.getDeviceState();
-        return ds == null ? false
-                : ds.getClass().equals(getClass()) && !((CurtainSwitchState) ds).dps.dp1.equals(dps.dp1);
+        if (other == null)
+            return false;
+
+        DeviceState stateOther = other.getDeviceState();
+
+        if (!stateOther.getClass().equals(getClass()))
+            return false;
+
+        Dps dps = (Dps) this.dps;
+        Dps dpsOther = (Dps) stateOther.dps;
+
+        return !dps.dp1.equals(dpsOther.dp1);
     }
 
     public class Dps {

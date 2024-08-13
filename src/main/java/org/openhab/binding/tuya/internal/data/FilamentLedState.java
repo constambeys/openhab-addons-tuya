@@ -23,9 +23,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Wim Vissers.
  */
-public class FilamentLedState extends DeviceState {
-
-    private Dps dps;
+public class FilamentLedState extends DeviceState<FilamentLedState.Dps> {
 
     public FilamentLedState() {
         super();

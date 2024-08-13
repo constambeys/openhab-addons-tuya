@@ -25,9 +25,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Wim Vissers.
  */
-public class PowerPlugState extends DeviceState {
-
-    private Dps dps;
+public class PowerPlugState extends DeviceState<PowerPlugState.Dps> {
 
     public PowerPlugState() {
         super();
@@ -54,8 +52,18 @@ public class PowerPlugState extends DeviceState {
      */
     @Override
     public boolean isConflicting(QueueItem other) {
-        DeviceState ds = other == null ? null : other.getDeviceState();
-        return ds == null ? false : ds.getClass().equals(getClass()) && !((PowerPlugState) ds).dps.dp1.equals(dps.dp1);
+        if (other == null)
+            return false;
+
+        DeviceState stateOther = other.getDeviceState();
+
+        if (!stateOther.getClass().equals(getClass()))
+            return false;
+
+        Dps dps = (Dps) this.dps;
+        Dps dpsOther = (Dps) stateOther.dps;
+
+        return !dps.dp1.equals(dpsOther.dp1);
     }
 
     public class Dps {

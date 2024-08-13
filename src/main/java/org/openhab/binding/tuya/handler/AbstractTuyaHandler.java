@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 import org.openhab.binding.tuya.internal.CommandDispatcher;
 import org.openhab.binding.tuya.internal.annotations.Property;
@@ -37,6 +38,7 @@ import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,18 +70,17 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      * Update the states of channels that are changed.
      */
     protected void updateStates(Message message, Class<? extends DeviceState> clazz) {
-        if (message != null && message.hasData()) {
-            try {
-                DeviceState dev = message.toDeviceState(clazz);
-                if (dev != null) {
-                    dev.forChangedProperties((channel, state) -> {
-                        updateState(new ChannelUID(thing.getUID(), channel), state);
-                    });
-                }
-            } catch (JsonSyntaxException e) {
-                logger.error("Statusmessage invalid", e);
-                logger.debug("Message: {}", message.getData());
+        try {
+            DeviceState dev = message.toDeviceState(clazz);
+            if (dev != null) {
+                BiConsumer<String, State> handler = (channel, state) -> {
+                    updateState(new ChannelUID(thing.getUID(), channel), state);
+                };
+                dev.forChangedProperties(handler);
             }
+        } catch (JsonSyntaxException e) {
+            logger.error("Statusmessage invalid", e);
+            logger.debug("Message: {}", message.getData());
         }
     }
 
@@ -89,14 +90,14 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      * @return
      */
     public boolean isOnline() {
-        return tuyaClient.isOnline();
+        return tuyaClient != null && tuyaClient.isOnline();
     }
 
     /**
      * This method is called when a DeviceEventEmitter.Event.MESSAGE_RECEIVED is received from the device. In
      * subclasses, this should result in a possible state change of the things channels.
      */
-    protected void handleStatusMessage(Message message) {
+    protected void handleMessage(Message message) {
         // When a message is received, the thing is ONLINE.
         updateStatus(ThingStatus.ONLINE);
     }
@@ -106,7 +107,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      */
     protected void sendStatusQuery() {
         try {
-            if (tuyaClient != null && tuyaClient.isOnline()) {
+            if (tuyaClient != null && tuyaClient.isStarted()) {
                 tuyaClient.send(null, CommandByte.DP_QUERY);
             }
         } catch (Exception e) {
@@ -185,7 +186,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      * @throws UnsupportedVersionException
      */
     private void deviceFound(DeviceDescriptor device) throws UnsupportedVersionException {
-        if (device != null && device.getDevId().equals(id) ) {
+        if (device != null && device.getDevId().equals(id)) {
             if (deviceDescriptor == null || !deviceDescriptor.getIp().equals(device.getIp())) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
                         "IP address: " + device.getIp());
@@ -219,7 +220,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
                 // Handle messages received.
                 tuyaClient.on(Event.MESSAGE_RECEIVED, (ev, msg) -> {
                     if (msg.getCommandByte() == STATUS || msg.getCommandByte() == DP_QUERY) {
-                        handleStatusMessage(msg);
+                        handleMessage(msg);
                     }
                     return true;
                 });
@@ -236,13 +237,13 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
      */
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (deviceDescriptor == null) {
-            logger.info("Command {} for channel {} not handled because deviceDescriptor is null.", command, channelUID);
-        } else {
+        if (tuyaClient != null && tuyaClient.isStarted()) {
             if (command instanceof RefreshType) {
                 sendStatusQuery();
-            } else if (!commandDispatcher.dispatchCommand(tuyaClient, channelUID, command, CONTROL)) {
-                logger.info("Command {} for channel {} could not be handled.", command, channelUID);
+            } else {
+                if (!commandDispatcher.dispatchCommand(tuyaClient, channelUID, command, CONTROL)) {
+                    logger.info("Command {} for channel {} could not be handled.", command, channelUID);
+                }
             }
         }
     }

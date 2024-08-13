@@ -23,9 +23,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Wim Vissers.
  */
-public class ColorLedState extends DeviceState {
-
-    private Dps dps;
+public class ColorLedState extends DeviceState<ColorLedState.Dps> {
 
     public ColorLedState() {
         super();

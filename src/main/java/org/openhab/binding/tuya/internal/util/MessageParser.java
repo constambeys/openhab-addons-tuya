@@ -153,6 +153,9 @@ public class MessageParser {
             byte[] data = new byte[dataWithReturnCode.length - 4];
             BufferUtils.copy(data, 0, dataWithReturnCode, 4, dataWithReturnCode.length - 4);
             long returnCode = dataWithReturnCode[0] * 256 * 256 * 256 + dataWithReturnCode[1] * 256 * 256 + dataWithReturnCode[2] * 256 + dataWithReturnCode[3];
+            if (BufferUtils.startsWith(data, "3.5".getBytes())) {
+                data = Arrays.copyOfRange(data, 3 + 12, payload.length);
+            }
             return new Message(sequenceNumber, returnCode, CommandByte.valueOf(Version.V3_5, (int) commandByte), data);
         } else {
             throw new ParseException("Prefix does not match: " + String.format("%x", prefix));

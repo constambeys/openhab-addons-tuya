@@ -11,7 +11,6 @@ package org.openhab.binding.tuya.internal.data;
 import static org.openhab.binding.tuya.TuyaBindingConstants.*;
 
 import org.openhab.binding.tuya.internal.annotations.Channel;
-import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.types.Command;
@@ -23,9 +22,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Wim Vissers.
  */
-public class SirenState extends DeviceState {
-
-    private Dps dps;
+public class SirenState extends DeviceState<SirenState.Dps> {
 
     public SirenState() {
         super();

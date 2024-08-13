@@ -36,8 +36,8 @@ public class CurtainSwitchHandler extends AbstractTuyaHandler {
      * result in a possible state change of this things channels.
      */
     @Override
-    protected void handleStatusMessage(Message message) {
-        super.handleStatusMessage(message);
+    protected void handleMessage(Message message) {
+        super.handleMessage(message);
         updateStates(message, CurtainSwitchState.class);
     }
 

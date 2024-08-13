@@ -8,9 +8,14 @@
  */
 package org.openhab.binding.tuya.internal.data;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import org.openhab.binding.tuya.internal.discovery.JsonDiscovery;
-
 import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -21,8 +26,6 @@ import java.nio.charset.StandardCharsets;
  * @author Wim Vissers.
  */
 public class Message {
-
-    private static final Gson GSON = new Gson();
 
     private long sequenceNumber;
     private long returnCode;
@@ -42,7 +45,7 @@ public class Message {
     public Message(long sequenceNumber, long returnCode, CommandByte commandByte, byte[] data) {
         this.sequenceNumber = sequenceNumber;
         this.returnCode = returnCode;
-        this.commandByte =  commandByte;
+        this.commandByte = commandByte;
         this.data = data;
     }
 
@@ -57,12 +60,12 @@ public class Message {
 
     public String getData() {
 
-        String text = null;
-        try {
-            text = new String(data, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            System.err.println(e.getStackTrace());
+        // Find the position of the first zero byte
+        int n;
+        for (n = 0; n < data.length && data[n] != 0; n++) {
         }
+        String text = new String(data, 0, n, StandardCharsets.UTF_8);
+
         return text;
     }
 
@@ -94,7 +97,8 @@ public class Message {
      * @return the DeviceDatagram if possible.
      */
     public JsonDiscovery toJsonDiscovery() {
-        return GSON.fromJson(getData(), JsonDiscovery.class);
+        Gson gson = new Gson();
+        return gson.fromJson(getData(), JsonDiscovery.class);
     }
 
     /**
@@ -107,6 +111,49 @@ public class Message {
      * @return a new instance of clazz filled with the message data.
      */
     public <T extends DeviceState> T toDeviceState(Class<T> clazz) {
-        return GSON.fromJson(getData(), clazz);
+        Gson gson = new GsonBuilder()
+                .create();
+
+        Map<String, Object> nestedMap = gson.fromJson(getData(), Map.class);
+        Object oDps = findKeyRecursively(nestedMap, "dps");
+        Map<String, Object> state = new HashMap<>();
+        state.put("dps", oDps);
+        JsonElement jsonElement = gson.toJsonTree(state);
+        return gson.fromJson(jsonElement, clazz);
+    }
+
+    public static Object findKeyRecursively(Map<String, Object> map, String keyToFind) {
+        // Check if the map contains the key at the current level
+        if (map.containsKey(keyToFind)) {
+            return map.get(keyToFind);
+        }
+
+        // Iterate over the entries in the map
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+
+            // If the value is another map, perform a recursive search
+            if (value instanceof Map) {
+                Object result = findKeyRecursively((Map<String, Object>) value, keyToFind);
+                if (result != null) {
+                    return result; // Return the value if the key is found
+                }
+            }
+
+            // If the value is a list, iterate through the list and check for maps
+            if (value instanceof List) {
+                for (Object item : (List<?>) value) {
+                    if (item instanceof Map) {
+                        Object result = findKeyRecursively((Map<String, Object>) item, keyToFind);
+                        if (result != null) {
+                            return result; // Return the value if the key is found
+                        }
+                    }
+                }
+            }
+        }
+
+        // Return null if the key was not found
+        return null;
     }
 }

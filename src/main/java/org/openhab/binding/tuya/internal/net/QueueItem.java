@@ -60,10 +60,9 @@ public class QueueItem {
                 break;
             case CONTROL:
                 if (device.getVersion() == Version.V3_5) {
-                    payload = String.format("%s%s{\"protocol\":5,\"t\":%d,\"data\":%s}", "3.5", new String(new byte[12]), deviceState.getTime(), deviceState.toJson());
+                    payload = String.format("%s%s{\"protocol\":5,\"t\":%d,\"data\":{\"dps\":%s}}", "3.5", new String(new byte[12]), deviceState.getTime(), deviceState.toJson());
                 } else if (device.getVersion() == Version.V3_3) {
-                    String state = deviceState.toJson();
-                    payload = String.format("{\"gwId\":\"%s\",\"devId\":\"%s\",\"t\":\"%d\",%s}", device.getDevId(), device.getDevId(), deviceState.getTime(), state.substring(1, state.length() - 1));
+                    payload = String.format("{\"gwId\":\"%s\",\"devId\":\"%s\",\"t\":\"%d\",%s}", device.getDevId(), device.getDevId(), deviceState.getTime(), deviceState.toJson());
                 } else {
                     payload = String.format("{}");
                 }

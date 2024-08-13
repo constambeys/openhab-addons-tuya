@@ -11,7 +11,6 @@ package org.openhab.binding.tuya.internal.data;
 import static org.openhab.binding.tuya.TuyaBindingConstants.CHANNEL_POWER;
 
 import org.openhab.binding.tuya.internal.annotations.Channel;
-import org.openhab.binding.tuya.internal.discovery.DeviceDescriptor;
 import org.openhab.binding.tuya.internal.net.QueueItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.types.Command;
@@ -23,9 +22,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Frédéric Hannes
  */
-public class SwitchState extends DeviceState {
-
-    private final Dps dps;
+public class SwitchState extends DeviceState<SwitchState.Dps> {
 
     public SwitchState() {
         super();
@@ -52,8 +49,18 @@ public class SwitchState extends DeviceState {
      */
     @Override
     public boolean isConflicting(QueueItem other) {
-        DeviceState ds = other == null ? null : other.getDeviceState();
-        return ds != null && ds.getClass().equals(getClass()) && !((SwitchState) ds).dps.dp1.equals(dps.dp1);
+        if (other == null)
+            return false;
+
+        DeviceState stateOther = other.getDeviceState();
+
+        if (!stateOther.getClass().equals(getClass()))
+            return false;
+
+        Dps dps = (Dps) this.dps;
+        Dps dpsOther = (Dps) stateOther.dps;
+
+        return !dps.dp1.equals(dpsOther.dp1);
     }
 
     public class Dps {
