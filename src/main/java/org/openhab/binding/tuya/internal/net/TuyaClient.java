@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -318,10 +319,13 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                     heartbeatCnt.decrementAndGet();
                 }
             } else {
-                if (message.getReturnCode() == 0)
-                    logger.debug("Message with Command {}", message.getData());
-                else
-                    logger.warn("Message with Command {}", message.getData());
+                SocketChannel channel = (SocketChannel) key.channel();
+                String log = MessageFormat.format("Incoming message from {0} with Command {1}, Code: {2}, Data {3}", channel.getRemoteAddress(), message.getCommandByte().name(), message.getReturnCode(), message.getData());
+                if (message.getReturnCode() != 0) {
+                    logger.warn(log);
+                } else {
+                    logger.info(log);
+                }
             }
             emit(Event.MESSAGE_RECEIVED, message);
         } catch (Exception e) {
@@ -361,7 +365,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                 channel.write(ByteBuffer.wrap(msgToBeSent));
             }
         } catch (Exception e) {
-            logger.debug("Exception in writeData.", e);
+            logger.error("Exception in writeData.", e);
             if (retryCnt.addAndGet(1) >= MAX_RETRIES) {
                 queue.poll();
                 retryCnt.set(0);

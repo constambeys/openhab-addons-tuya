@@ -142,9 +142,8 @@ public class TuyaClientService implements Runnable, TcpConfig {
                 }
                 cleanClientsMap();
             } catch (IOException e) {
-                logger.error("IOException servicing Tuya client", e);
+                logger.warn("IOException servicing Tuya client", e);
             }
-
         }
         cleanUp();
     }
@@ -165,7 +164,7 @@ public class TuyaClientService implements Runnable, TcpConfig {
             channel.register(selector, OP_WRITE);
             client.handleConnect(key);
         } catch (IOException e) {
-            logger.debug("Error connecting {}.", e.getMessage());
+            logger.warn("Error connecting {}.", e.getMessage());
             key.channel().close();
             key.cancel();
             if (client != null) {

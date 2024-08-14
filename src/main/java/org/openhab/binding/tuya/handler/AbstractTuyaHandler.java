@@ -79,7 +79,7 @@ public abstract class AbstractTuyaHandler extends BaseThingHandler implements Tc
                 dev.forChangedProperties(handler);
             }
         } catch (JsonSyntaxException e) {
-            logger.error("Statusmessage invalid", e);
+            logger.error("Message invalid", e);
             logger.debug("Message: {}", message.getData());
         }
     }
