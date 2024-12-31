@@ -54,7 +54,7 @@ public class SwitchState extends DeviceState<SwitchState.Dps> {
 
         DeviceState stateOther = other.getDeviceState();
 
-        if (!stateOther.getClass().equals(getClass()))
+        if (stateOther == null || !stateOther.getClass().equals(getClass()))
             return false;
 
         Dps dps = (Dps) this.dps;
