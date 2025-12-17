@@ -109,7 +109,7 @@ public class TuyaClient extends SingleEventEmitter<TuyaClient.Event, Message, Bo
                     try {
                         send(null, CommandByte.HEART_BEAT);
                     } catch (Exception e) {
-                        logger.error("Cannot send command HEART_BEAT", e);
+                        logger.warn("Cannot send command HEART_BEAT", e);
                     }
                 }
             }, HEARTBEAT_SECONDS, HEARTBEAT_SECONDS, TimeUnit.SECONDS);

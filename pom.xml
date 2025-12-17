@@ -5,10 +5,10 @@
     <parent>
         <groupId>org.openhab.addons.bundles</groupId>
         <artifactId>org.openhab.addons.reactor.bundles</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+    	<version>5.0.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openhab.binding.tuya</artifactId>
+    <artifactId>org.openhab.binding.mytuya</artifactId>
 
     <name>openHAB Add-ons :: Bundles :: Tuya Binding</name>
 
